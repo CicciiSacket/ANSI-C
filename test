@@ -1,0 +1,116 @@
+//
+//  main.c
+//  Progetto C per Covid-19
+//
+//  Created by Francesco Sacco on 16/03/2020.
+//  Copyright © 2020 Francesco Sacco. All rights reserved.
+//
+
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+#define STATO int
+#define GUARITO 0
+#define CASA 1
+#define OSPEDALE 2
+#define INTENSIVA 3
+#define SUBINTENSIVA 4
+
+
+/*una funzione non restituisce un vettore quindi si deve utilizzzare per forza un print per pre-caricare i dati del punto 1 e 2 --- i dati inseriti sono puramente indicativi e molti non corrispondono al reale [v.risposta1 documento] */
+
+//funzinoni per restituire i precaricamenti//
+void regions(){
+    printf("The Italian regions are: \n"
+           " Valle d'Aosta (statuto speciale) [IT23] \n Piemonte [IT21] \n Liguria [IT42] \n Lombardia [IT25] \n Trentino-Alto Adige (statuto speciale) [IT32] \n Veneto [IT34] \n Friuli-Venezia Giulia (statuto speciale) [IT36] \n Emilia Romagna [IT45] \n Toscana [IT52] \n Umbria [IT55] \n Marche [IT57] \n Lazio [IT62] \n Abruzzo [IT65] \n Molise [IT67] \n Campania [IT72] \n Puglia [IT75] \n Basilicata [IT77] \n Calabria [IT78] \n Sicilia (statuto speciale) [IT82] \n Sardegna (statuto speciale) [IT88] \n ");
+}
+
+void data(){
+    printf("The most active hospitals in Italy are: \n");
+    printf("Ospedale Papa Giovanni XXIII di Bergamo\n"
+           "Piazza OMS, 1, 24127 Bergamo BG \n"
+           "Posti letto: 1200; (53 di terapia intensiva e 40 sub intensiva) \n");
+    printf("\n");
+    printf("Policlinico di Milano \n"
+           "Via Francesco Sforza, 35, 20122 Milano MI \n"
+           "Numero di letti: 900 \n");
+    printf("\n");
+    printf("Presidio Ospedaliero Martini \n"
+           "Via Tofane, 71 – TORINO \n"
+           "Posti letto: 229 (20 dei quali dedicati ad attività di day hospital o day surgery.)\n");
+}
+
+//strutture dati di regioni, ammalati e ospedali; l'elemento ammalati è un vettore con i vari dettagli e anche qui i dati sono prettamente indicativi//
+
+
+struct ammalati{
+    char nome[20];
+    char cognome[20];
+    char fiscale[30];
+//    enum stato {HomeHospitalization,Hospitalization,SubintensiveTherapy,IntensiveTherapy,cured};
+    time_t admissioDate;
+    time_t dischargeDate;
+};
+
+
+struct regioni{
+    char nome_regione[140];
+    char codice_univoco_regione[140];
+    char capoluogo[140];
+    char presidente_regione[140];
+    int ospadali_regione;
+    struct ammalati;
+};
+
+struct regioni lombardia = {"lombardia", "IT25","milano","Attilio Fontana",306};
+    struct ammalati paziente1 = {"giovanni", "lalla" , "sascac", 2};
+struct regioni Emilia_Romagna = {"Emilia Romagna", "IT45","Bologna", "Stefano Bonaccini", 284};
+struct regioni Veneto = {"Veneto","IT34","Luca Zaia","Venezia",187};
+
+
+
+struct ospedali{
+    char nome_ospedale[140];
+    char codice_univoco_ospedale[140];
+    char indirizzo_ospedale[140];
+    char responsabile_struttura[140];
+    int numero_posti_letto;
+    int numero_posti_terapia_intensiva;
+};
+struct ospedali Spallanzani = { .codice_univoco_ospedale = "01000502",.indirizzo_ospedale = "Via Portuense, 292, 00149 Roma RM",.nome_ospedale = "Istituto nazionale per le malattie infettive Lazzaro Spallanzani",.responsabile_struttura = "Marta Branca", 1000, 338};
+struct ospedali Giovanni_XXIII = {"Papa Giovanni XXIII", "01000602", "Piazza OMS, 1, 24127 Bergamo BG", "Giovanni Carmagnola", 934, 296};
+struct ospedali Policlino_Milano = {"Policlino di Milano", "030930", "Via Francesco Sforza, 35, 20122 Milano MI", "Mario Rossi", 1108, 385};
+
+
+
+//main principale// uno switch menù con i vari casi indicati con numeri interi ma seguendo lo schema della foto iniziale//
+int main(void){
+    
+
+    
+    printf("Welcome to pandemic analyzer! \n");
+    printf("\n");
+    regions();
+    printf("\n");  //riga vuota che non so come altro fare//
+    data();
+    printf("\n");
+    
+    int Menù;
+    printf("selezionare 1 per avere i dati statistici del paese selzionato. \n"
+           "selezionare 2 per avere più informazioni sulle regioni. \n"
+           "selezionare 3 ed inserire codice univoco regione per avere informazioni sugli ospedali della regione. \n"
+           "selezionare 4 ed inserire ed inserire il codice univoco di un ospedale. \n");
+    scanf("%d", &Menù);
+    switch (Menù) {
+        case 1: printf("%s",paziente1.fiscale);
+            
+            break;
+            
+        default:
+            break;
+    }
+    
+    
+    
+    
+}
