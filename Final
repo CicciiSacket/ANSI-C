@@ -1,0 +1,694 @@
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include <stdbool.h>
+ 
+//stato malato
+typedef enum {HomeHosp=1, Hospit, Subint, IntTherapy, Healed}stateIll;
+//struct giorno ammissione e remissione
+typedef struct{
+    int year;
+    int month;
+    int day;
+}admDate, discDate;
+ 
+//struct malato
+typedef struct
+{
+    char PatientName[10];
+    char PatientSurname[10];
+    char FiscalCode[20];
+    stateIll state;
+    admDate admissioDate;
+    discDate dischargeDate;
+    int dayOfSickness;
+}Sick;
+//struct ospedali
+typedef struct
+{
+    char HospitalName[50];
+    char HospitalCode[10];
+    char manager[50];
+    char address[50];
+    int beds;
+    int IntensiveTherapyBeds;
+    Sick patients[20];
+    //variabili per calcoli statistici
+    int TotPatientsHosp;
+    int subintHosp;
+    int intTerHosp;
+ 
+}Hosp;
+ //struct regioni
+typedef struct
+{
+    char RegName[10];
+    char RegCode[8];
+    char RegMainCity[10];
+    char president[20];
+    Hosp Hospital[20];
+    //variabili per calcoli statistici
+    int sickTot;
+    int ToThealedReg;
+    int ToTsubintReg;
+    int ToTintTerReg;
+    int TotnormHospReg;
+    int TotHomeHospReg;
+ 
+}Region;
+ 
+int numOfReg = 20;
+int numOfHosp = 20;
+int numOfPatients = 20;
+//variabil per calcoli statistici
+int totHomeHosp = 0;
+int totNormHosp = 0;
+int totSubInt = 0;
+int totIntTer = 0;
+int totHealed = 0;
+int totSick = 0;
+//variabili di controllo, si usano per poter assegnare il minimo e il massimo tempo di malattia
+int minTime = 999999;
+int maxTime = 0;
+//array di regioni
+Region regions[20];
+//funzione per inzializzare gli elementi degli array creando elementi vuoti e dando Empty come nome regione, nome ospedale e codice fiscale di ogni elemento degli array
+void loadEmpty(){
+    for(int i = 0; i<numOfReg-1; i++){
+        strcpy(regions[i].RegName, "Empty");
+        for(int n = 0; n<numOfHosp-1;n++){
+            strcpy(regions[i].Hospital[n].HospitalName, "Empty");
+            for(int m = 0; m<numOfPatients-1; m++){
+                strcpy(regions[i].Hospital[n].patients[m].FiscalCode, "Empty");
+            }
+        }
+    }
+    //trasformo l 'ultimo elemento di ogni array in modo da restituirlo in seguito nelle funzioni di ricerca in caso negativo
+    strcpy(regions[numOfReg-1].RegName,"----");
+    strcpy(regions[numOfReg-1].Hospital[numOfHosp-1].HospitalName,"----");
+    strcpy(regions[numOfReg-1].Hospital[numOfHosp-1].patients[numOfPatients-1].FiscalCode,"----");
+}
+//funzione per azzerare i contatori nei calcoli statistici
+void zeroSick(){
+    totHomeHosp = 0;
+    totNormHosp = 0;
+    totSubInt = 0;
+    totIntTer = 0;
+    totHealed = 0;
+    totSick = 0;
+    for(int i=0; i<numOfReg; i++){
+        regions[i].sickTot = regions[i].ToThealedReg = regions[i].TotHomeHospReg = regions[i].ToTsubintReg = regions[i].ToTintTerReg = 0;
+        for(int n=0; n<numOfHosp;n++){
+            regions[i].Hospital[i].intTerHosp = regions[i].Hospital[i].subintHosp = regions[i].Hospital[i].TotPatientsHosp = 0;
+            }
+    }
+}
+//funzione per contare gli ammalati per ogni regione e ospedale
+void countSick(){
+    //prima richiama la funzione per azzerare i contatori
+    zeroSick();
+    //dopo cicla regioni, ospedali e pazienti
+    for(int i=0; i<numOfReg; i++){
+        for(int n=0; n<numOfHosp;n++){
+            for(int x=0; x<numOfPatients;x++){
+                //uguaglianza al contrario: restituisce true se non sono uguali (se non c'è il punto esclamativo su strcmp, altrimenti restituisce true se SONO uguali)
+                if(strcmp(regions[i].Hospital[n].patients[x].FiscalCode, "Empty")){
+                    //switch che differenzia gli stati del paziente
+                    switch(regions[i].Hospital[n].patients[x].state){
+                        //ospedalizzato a casa
+                        case 1:{
+                            totHomeHosp++;
+                            totSick++;
+                            regions[i].TotHomeHospReg++;
+                            regions[i].sickTot++;
+                            break;
+                        }
+                        //ospedalizzato normale
+                        case 2:{
+                            totNormHosp++;
+                            totSick++;
+                            regions[i].sickTot++;
+                            regions[i].TotnormHospReg++;
+                            regions[i].Hospital[n].TotPatientsHosp++;
+                            break;
+                        }
+                        //subintensiva
+                        case 3:{
+                            totSubInt++;
+                            totSick++;
+                            regions[i].sickTot++;
+                            regions[i].ToTsubintReg++;
+                            regions[i].Hospital[n].subintHosp++;
+                            regions[i].Hospital[n].TotPatientsHosp++;
+                            break;
+                        }
+                        //terapia intensiva
+                        case 4:{
+                            totIntTer++;
+                            totSick++;
+                            regions[i].sickTot++;
+                            regions[i].ToTintTerReg++;
+                            regions[i].Hospital[n].intTerHosp++;
+                            regions[i].Hospital[n].TotPatientsHosp++;
+                            break;
+                        }
+                        //guarito
+                        case 5:{
+                            totHealed++;
+                            regions[i].ToThealedReg++;
+                            break;
+                        }
+                           
+                    }
+                }
+            }
+        }
+    }
+    printf("\n------Database updated------\n");
+}
+//funzione per inserire una nuova regione
+void insertRegion(){
+    //ciclo tutte le regioni per trovare quella vuota
+    for(int i = 0; i< numOfReg;i++){
+        //uguaglianza con empty, verifica se la regione sia "vuota"
+    if (!strcmp(regions[i].RegName, "Empty")){
+        printf("insert new region ");
+        scanf("%s", &regions[i].RegName);
+        printf("insert region code ");
+        scanf("%s", &regions[i].RegCode);
+        printf("insert the nome of the region's president ");
+        scanf("%s", &regions[i].president);
+        printf("the RegMainCity region ");
+        scanf("%s", &regions[i].RegMainCity);
+        break;
+        }
+    }
+}
+//funzione per inserire un nuovo ospedale, prende come parametro il numero di regione (NON IL CODICE MA IL NUMERO DELLA REGIONE COME POSIZIONE NELL'ARRAY)
+void insertHospital(int choReg){
+    for (int n = 0; n < 20; n++)
+    {
+        if(!strcmp(regions[choReg].Hospital[n].HospitalName,"Empty")){
+            printf("insert hospital name (do not use spaces, use _ instead) ");
+            scanf("%s", regions[choReg].Hospital[n].HospitalName);
+            printf("insert  hospital address (do not use spaces, use _ instead) ");
+            scanf("%s", regions[choReg].Hospital[n].address);
+            printf("insert hospital's manger name (do not use spaces, use _ instead) ");
+            scanf("%s", regions[choReg].Hospital[n].manager);
+            printf("insert hospital code ");
+            scanf("%s", &regions[choReg].Hospital[n].HospitalCode);
+            printf("insert ordinary beds number(no ter. int.) ");
+            scanf("%d", &regions[choReg].Hospital[n].beds);
+            printf("insert number of beds in intensive therapy ");
+            scanf("%d", &regions[choReg].Hospital[n].IntensiveTherapyBeds);
+            break;
+        }
+    }
+}
+//funzione per inserire paziente, prende in input il codice fiscale (puntatore) per verificare che il paziente non sia già inserito
+void insertPatient(char *fiscalCode){
+    int choReg;
+    printf("Select the region where the patient is hospitalized: ");
+    printRegions();
+    scanf("%d", &choReg);
+    int choHosp;
+    printf("Select the hospital: ");
+    printHospitals(regions[choReg]);
+    scanf("%d", &choHosp);
+    for (int n = 0; n < 20; n++)
+    {
+        //cicla tutti i pazienti dell'ospedale e restituisce il primo slot vuoto (fiscal code == "Empty")
+        if(!strcmp(regions[choReg].Hospital[choHosp].patients[n].FiscalCode,"Empty")){
+            strcpy(regions[choReg].Hospital[choHosp].patients[n].FiscalCode, fiscalCode);
+            printf("insert patient name ");
+            scanf("%s", &regions[choReg].Hospital[choHosp].patients[n].PatientName);
+            printf("insert  patient surname ");
+            scanf("%s", &regions[choReg].Hospital[choHosp].patients[n].PatientSurname);
+            //INSERIMENTO DATE DI DIAGNOSI
+            printf("insert admission's date year ");
+            int admYear;
+            scanf("%d", &admYear);
+            regions[choReg].Hospital[choHosp].patients[n].admissioDate.year = admYear;
+            printf("insert admission's date month ");
+            int adMonth;
+            scanf("%d", &adMonth);
+            regions[choReg].Hospital[choHosp].patients[n].admissioDate.month = adMonth;
+            printf("insert admission's date day ");
+            int admDay;
+            scanf("%d", &admDay);
+            regions[choReg].Hospital[choHosp].patients[n].admissioDate.day = admDay;
+            printf("insert patient's state of therapy (1 - Home Hospitalization 2 - Hospitalization 3 - Subintensive therapy 4 - Intensive therapy) ");
+            int stateVar;
+            scanf("%d", &stateVar);
+            if(stateVar < 5 && stateVar > 0){
+                regions[choReg].Hospital[choHosp].patients[n].state = stateVar;
+                printf("Patient %s was added to the hospital %s", regions[choReg].Hospital[choHosp].patients[n].FiscalCode, regions[choReg].Hospital[choHosp].HospitalName);
+            }
+            else{
+                printf("Insert a number between 1 and 5\n");
+            }
+            break;
+        }
+    }
+}
+//trova un paziente dando in input il suo codice fiscale (puntatore)
+Sick findPatient(char *fiscalCode){
+    for(int i = 0; i < numOfReg; i++){
+        for(int n = 0; n <numOfHosp; n++){
+            for(int x = 0; x < numOfPatients; x++){
+                if(!strcmp(regions[i].Hospital[n].patients[x].FiscalCode, fiscalCode)){
+                    return regions[i].Hospital[n].patients[x];
+                }
+            }
+        }
+    }
+    //se il ciclo non trova il paziente, restituisce il paziente con CF uguale a "----" in modo da avere un controllo
+    return regions[numOfReg-1].Hospital[numOfHosp-1].patients[numOfPatients-1];
+}
+//trova un ospedale dando in input il suo codice
+Hosp findOspital(char *HospitalCode){
+    for(int i = 0; i < numOfReg; i++){
+        for(int n = 0; n < numOfHosp; n++){
+            if(!strcmp(regions[i].Hospital[n].HospitalCode, HospitalCode)){
+                return regions[i].Hospital[n];
+                    }
+                }
+            }
+//se il ciclo non trova la regione , restituisce la regione con CF uguale a '----" in modo da avere un controllo
+    return regions[numOfReg-1].Hospital[numOfHosp-1];
+}
+//trova una regione dando in input il suo codice
+Region findRegion(char *RegCode){
+    for(int i = 0; i < numOfReg; i++){
+        if(!strcmp(regions[i].RegCode, RegCode)){
+            return regions[i];
+        }
+    }
+//se il ciclo non trova la regione, restituisce la reigione con CF uguale a '----" in modo da avere un controllo
+    return regions[numOfReg -1];
+}
+//funzione per stampare l'ospedale che prende in input
+void printHospital(Hosp hospital){
+    printf("\n%s %s %s Man: %s Patients: %d (Subint T. %d Int T. %d) beds: %d (int t: %d)",
+        hospital.HospitalName,
+        hospital.HospitalCode,
+        hospital.address,
+        hospital.manager,
+ 
+        hospital.TotPatientsHosp,
+        hospital.subintHosp,
+        hospital.intTerHosp,
+        hospital.beds,
+        hospital.IntensiveTherapyBeds);
+}
+//stampa tutti gli ospedali di una regione presa in input
+void printHospitals(Region region){
+    for (int n = 0; n < numOfHosp-1; n++){
+        printHospital(region.Hospital[n]);
+        }
+}
+//stampa tutte le regioni
+void printRegions(){
+    for (int i = 0; i < numOfReg-1; i++){
+        printf("\n[%d] %s %s %s -President: %s - tot sick: %d (Home: %d, hosp: %d, SubInt T : %d, Int. T : %d) healed: %d ",
+        i,
+        regions[i].RegName, regions[i].RegCode,
+        regions[i].RegMainCity,regions[i].president,
+        regions[i].sickTot,
+        regions[i].TotHomeHospReg,
+        regions[i].TotnormHospReg,
+        regions[i].ToTsubintReg,
+        regions[i].ToTintTerReg,
+        regions[i].ToThealedReg);
+    }
+}
+//stampa un paziente preso in input
+void printPatient(Sick patient){
+       
+        printf("\n%s %s %s - date of diagnosis: %d-%d-%d - ",patient.PatientName,patient.PatientSurname,patient.FiscalCode,patient.admissioDate.day,patient.admissioDate.month,patient.admissioDate.year);
+        printf("State: ");
+        //switch in base all enum dello stato paziente
+        switch(patient.state){
+            case 1 :
+                printf("Home Hospitalization");
+                break;
+            case 2:
+                printf("Normal Hospitalization");
+                break;
+            case 3:
+                printf("Subintensive therapy");
+                break;
+            case 4:
+                printf("Intensive therapy");
+                break;
+            case 5:
+                printf("Healed");
+                printf("\nDATE OF REMISSION: %d-%d-%d", patient.dischargeDate.day,patient.dischargeDate.month,patient.dischargeDate.year);
+                printf("\nTIME OF SICNKESS: :%d", getTimeOfSickness(patient));
+                break;
+        }
+    }
+//stampa tutti i pazienti di un ospedale
+void printPatients(Hosp hospital){
+    for(int i = 0; i < numOfPatients-1; i++){
+        printPatient(hospital.patients[i]);
+    }
+}
+//funzione per indicare che un paziente è guarito
+void healedPatient(){
+    char fiscalCode[15];
+    printf("Insert patient's fiscal code: ");
+    scanf("%s", fiscalCode);
+    //richiama la funzione find per trovare il paziente che viene definito dalla variabile HEALED
+    Sick healed = findPatient(fiscalCode);
+    //se il cf del paziente risulta quello restituito in caso negativo , avvisa che il paziente non è stato trovato
+    if(!strcmp(healed.FiscalCode, "----")){
+        printf("No patient found with this fiscal code, try again (program is case sensitive)");
+    }
+    else{
+        printf("\nPatient: %s %s\n", healed.PatientName,healed.PatientSurname);
+        int remYear;
+        int remMon;
+        int remDay;
+        printf("Insert remission year ");
+        scanf("%d", &remYear);
+        printf("Insert remission month ");
+        scanf("%d", &remMon);
+        printf("Insert remission day ");
+        scanf("%d", &remDay);
+        if(remYear <2020 || remMon>12 || remDay >30){
+            printf("\nInsert valid data please");
+        }
+        healed.dischargeDate.year = remYear;
+        healed.dischargeDate.month = remMon;
+        healed.dischargeDate.day = remDay;
+        //cambio lo stato del paziente a 5 che indica GUARITO
+        healed.state = 5;
+        //funzione per il calcolo dei giorni di malattia
+        healed.dayOfSickness = getTimeOfSickness(healed);
+        //controllo che la data di remissione sia più recente della data di diagnosi
+        if(healed.dayOfSickness < 0){
+            printf("Discharge date must be more recent than admission date. Try Again");
+            return;
+        }
+        //ciclo tutti i pazienti nel db e cambio lo stato del primo paziente che ha il cf uguale a quello del nostro guarito
+        for(int i = 0; i < numOfReg; i++){
+            for(int n = 0; n < numOfHosp; n++){
+                for(int j = 0; j<numOfPatients; j++){
+                    if(!strcmp(regions[i].Hospital[n].patients[j].FiscalCode, healed.FiscalCode)){
+                        regions[i].Hospital[n].patients[j] = healed;
+                    }
+                }
+            }
+        }
+        printf("State change was succesfull");
+       
+        printf("\nDays of Sickness: %d", healed.dayOfSickness);
+        }
+}
+//funzione di conta della malattia, restituisce il numero di giorni
+int getTimeOfSickness(Sick patient){
+    //creo le variabili di gap, che contano la differenza tra le date
+    int yearGap, monthGap, dayGap = 0;
+    yearGap = patient.dischargeDate.year - patient.admissioDate.year;
+    monthGap = patient.dischargeDate.month - patient.admissioDate.month;
+    if(yearGap == 1){
+        if(monthGap < 0){
+            //se il gap dell'anno è 1 ma la malattia è durata meno di un anno calcolo la durata di ogni mese trascorso
+            dayGap = (12 - patient.admissioDate.month)*30 + patient.dischargeDate.month*30 + patient.dischargeDate.day - patient.admissioDate.day;
+        }
+        else if(monthGap >=0){
+            //se il gap dell'anno è 1 e il mese di guarigione è maggiore rispetto al mese di diagnosi calcolo la differenza dei mesi per 30
+            dayGap = 12 * 30 + (patient.dischargeDate.month-patient.admissioDate.month)*30 + patient.dischargeDate.day - patient.admissioDate.day;
+        }
+    }
+    else{
+        //oltre a prima aggiungo la conta dei giorni per ogni anno di differenza, se gli anni di differenza sono pari a 0 non aggiunge niente.
+        if(monthGap < 0){
+            dayGap = (patient.dischargeDate.year-patient.admissioDate.year)*360 + (12 - patient.admissioDate.month)*30 + patient.dischargeDate.month*30 + patient.dischargeDate.day - patient.admissioDate.day;
+        }
+        else if(monthGap >=0){
+            dayGap = (patient.dischargeDate.year-patient.admissioDate.year)*360 + (patient.dischargeDate.month-patient.admissioDate.month)*30 + patient.dischargeDate.day - patient.admissioDate.day;
+        }
+    }
+    return dayGap;
+}
+ 
+//funzione delle statistiche
+void getStatistics(){
+//statistica per trovare il tempo medio, creo le variabili average, tempo totale cumulato e numero di elementi (che hanno tempo non nullo)
+    double avgTimeSickTot = 0;
+    int timeSickTot = 0;
+    int count = 0;
+//ciclo tutti i pazienti per trovare tempi di degenza non nulli
+    for(int i = 0; i < numOfReg; i++){
+        for(int n = 0; n < numOfHosp; n++){
+            for(int j = 0; j < numOfPatients; j++){
+                if(regions[i].Hospital[n].patients[j].dayOfSickness != 0){
+                    //aumento il numero di elementi e il tempo totale cumulato
+                    count++;
+                    timeSickTot+= regions[i].Hospital[n].patients[j].dayOfSickness;
+                }
+            }
+        }
+    }
+    //operazione per avere la media
+    avgTimeSickTot = timeSickTot/count;
+    printf("\nTOTAL SICK PEOPLE: %d (home hosp: %d - normal hosp %d - subintensive therapy hosp: %d - intensive therapy hosp: %d)\nTOTAL HEALED PEOPLE: %d\n",totSick,totHomeHosp,totNormHosp,totSubInt,totIntTer,totHealed);
+    printf("\nAVERAGE DURATION OF ILLNESS: %f days", avgTimeSickTot);
+    //creo le variabili che indichino il massimo
+    int maxRegSick, maxRegHeal, maxRegIntTer = 0;
+    char maxSickRegName[20], maxHealRegName[20], maxIntTerRegName[20], maxTimeRegName[20], minTimeRegName[20];
+    for(int i = 0; i <numOfReg-1;i++){
+        //all'interno dello stesso ciclo facciamo più controlli utilizzando variabili temporanee per salvare il nome delle regioni che risultano avere più ammalati / guariti etc.
+        if(regions[i].sickTot > maxRegSick){
+            maxRegSick = regions[i].sickTot;
+            strcpy(maxSickRegName,regions[i].RegName);
+        }
+        if(regions[i].ToThealedReg > maxRegHeal){
+            maxRegHeal = regions[i].ToThealedReg;
+            strcpy(maxHealRegName,regions[i].RegName);
+        }
+        if(regions[i].ToTintTerReg > maxRegIntTer ){
+            maxRegIntTer = regions[i].ToTintTerReg;
+            strcpy(maxIntTerRegName,regions[i].RegName);
+        }
+        //ciclo ospedali e pazienti per trovare il tempo di degenza massimo e minimo, conservando il nome della rispettiva regione
+        for(int n = 0; n < numOfHosp; n++){
+            for(int j = 0; j < numOfPatients; j++){
+                if(regions[i].Hospital[n].patients[j].dayOfSickness != 0){
+                    if(regions[i].Hospital[n].patients[j].dayOfSickness > maxTime){
+                        maxTime = regions[i].Hospital[n].patients[j].dayOfSickness;
+                        strcpy(maxTimeRegName,regions[i].RegName);
+                    }
+                    if(regions[i].Hospital[n].patients[j].dayOfSickness < minTime){
+                        minTime = regions[i].Hospital[n].patients[j].dayOfSickness;
+                        strcpy(minTimeRegName,regions[i].RegName);
+                    }
+                }
+            }
+        }
+    }
+    printf("\nRegion with most sick people is %s with %d cases ",  maxSickRegName,maxRegSick);
+    printf("\nRegion with most healed people is %s with %d healed ",  maxHealRegName,maxRegHeal);
+    printf("\nRegion with most sick people under intensive therapy is %s with %d cases ",  maxIntTerRegName,maxRegIntTer);
+    printf("\nRegion with max time of recovery is %s with %d days ",  maxTimeRegName,maxTime);
+    printf("\nRegion with min time of recovery is %s with %d days ",  minTimeRegName,minTime);
+ 
+}
+//precaricamento
+void fakeLoad(){
+    strcpy(regions[0].RegName, "Sicilia");strcpy(regions[0].RegMainCity, "Palermo");strcpy(regions[0].RegCode, "IT-82");
+    strcpy(regions[1].RegName, "Calabria");strcpy(regions[1].RegMainCity, "Reggio-Calabria");strcpy(regions[1].RegCode, "IT-78");
+    strcpy(regions[2].RegName, "Campania");strcpy(regions[2].RegMainCity, "Napoli");strcpy(regions[2].RegCode, "IT-72");
+    strcpy(regions[3].RegName, "Puglia");strcpy(regions[3].RegMainCity, "Lecce");strcpy(regions[3].RegCode, "IT-75");
+    strcpy(regions[4].RegName, "Basilicata");strcpy(regions[4].RegMainCity, "Basilicata");strcpy(regions[4].RegCode, "IT-77");
+    strcpy(regions[5].RegName, "Molise");strcpy(regions[5].RegMainCity, "Campobasso");strcpy(regions[5].RegCode, "IT-67");
+    strcpy(regions[6].RegName, "Lazio");strcpy(regions[6].RegMainCity, "Roma");strcpy(regions[6].RegCode, "IT-62");
+    strcpy(regions[7].RegName, "Sardegna");strcpy(regions[7].RegMainCity, "Cagliari");strcpy(regions[7].RegCode, "IT-88");
+    strcpy(regions[8].RegName, "Abruzzo");strcpy(regions[8].RegMainCity, "L'Aquila");strcpy(regions[8].RegCode, "IT-65");
+    strcpy(regions[9].RegName, "Marche");strcpy(regions[9].RegMainCity, "Ancona");strcpy(regions[9].RegCode, "IT-57");
+    strcpy(regions[10].RegName, "Piemonte");strcpy(regions[10].RegMainCity, "Torino");strcpy(regions[10].RegCode, "IT-21");
+    strcpy(regions[11].RegName, "Lombardia");strcpy(regions[11].RegMainCity, "Milano");strcpy(regions[11].RegCode, "IT-25");
+    strcpy(regions[12].RegName, "Toscana");strcpy(regions[12].RegMainCity, "Firenze");strcpy(regions[12].RegCode, "IT-52");
+    strcpy(regions[13].RegName, "Liguria");strcpy(regions[13].RegMainCity, "Genova");strcpy(regions[13].RegCode, "IT-42");
+    strcpy(regions[14].RegName, "Trentino-AltoAdige");strcpy(regions[14].RegMainCity, "Trento");strcpy(regions[14].RegCode, "IT-32");
+    strcpy(regions[15].RegName, "Friuli-Venezia-Giulia");strcpy(regions[15].RegMainCity, "Trieste");strcpy(regions[15].RegCode, "IT-36");
+    strcpy(regions[16].RegName, "Umbria");strcpy(regions[16].RegMainCity, "Perugia");strcpy(regions[16].RegCode, "IT-55 ");
+    strcpy(regions[17].RegName, "Emilia-Romagna");strcpy(regions[17].RegMainCity, "Bologna");strcpy(regions[17].RegCode, "IT-45");
+    strcpy(regions[18].RegName, "Veneto");strcpy(regions[18].RegMainCity, "Venezia");strcpy(regions[18].RegCode, "IT-34");
+    strcpy(regions[0].Hospital[0].patients[10].FiscalCode, "0");strcpy(regions[0].Hospital[0].patients[10].PatientName, "Mirko");strcpy(regions[0].Hospital[0].patients[10].PatientSurname, "Torrisi");regions[0].Hospital[0].patients[10].state=2;
+    regions[0].Hospital[0].patients[10].admissioDate.day = 1; regions[0].Hospital[0].patients[10].admissioDate.month = 10;regions[0].Hospital[0].patients[10].admissioDate.year = 2020;
+    for(int i = 0; i < numOfReg-1; i++){
+        strcpy(regions[i].Hospital[0].HospitalName, "OSPEDALE MARIA VITTORIA");strcpy(regions[i].Hospital[0].address, "VIA CIBRARIO LUIGI, 72");strcpy(regions[i].Hospital[0].HospitalCode, "010003");regions[i].Hospital[0].beds = 200;regions[i].Hospital[0].IntensiveTherapyBeds = 20;
+        strcpy(regions[i].Hospital[1].HospitalName, "OSPEDALI RIUNITI A.S.L.");strcpy(regions[i].Hospital[1].address, "VIA DE MARIA, 3");strcpy(regions[i].Hospital[1].HospitalCode, "010004");regions[i].Hospital[1].beds = 160;regions[i].Hospital[1].IntensiveTherapyBeds = 10;
+        strcpy(regions[i].Hospital[2].HospitalName, "OSPEDALE MAGGIORE");strcpy(regions[i].Hospital[2].address, "VIA DE MARIA 1");strcpy(regions[i].Hospital[2].HospitalCode, "01000401");regions[i].Hospital[2].beds = 120;regions[i].Hospital[2].IntensiveTherapyBeds = 5;
+        strcpy(regions[i].Hospital[3].HospitalName, "OSPEDALE SANTA CROCE");strcpy(regions[i].Hospital[3].address, "P.ZA AMEDEO FERDINANDO 3");strcpy(regions[i].Hospital[3].HospitalCode, "01000402");regions[i].Hospital[3].beds = 110;regions[i].Hospital[3].IntensiveTherapyBeds = 10;
+        strcpy(regions[i].Hospital[4].HospitalName, "OSPEDALE SAN LORENZO");strcpy(regions[i].Hospital[3].address, "VIA OSPEDALE 13");strcpy(regions[i].Hospital[3].HospitalCode, "01000403");regions[i].Hospital[3].beds = 110;regions[i].Hospital[3].IntensiveTherapyBeds = 20;
+        strcpy(regions[i].Hospital[5].HospitalName, "OSPEDALE SAN BIAGIO");strcpy(regions[i].Hospital[3].address, "VIA DEBOUCHE', 8");strcpy(regions[i].Hospital[3].HospitalCode, "01000404");regions[i].Hospital[3].beds = 80;regions[i].Hospital[3].IntensiveTherapyBeds = 10;
+        for(int n = 0; n<6;n++){
+            strcpy(regions[i].Hospital[n].patients[0].FiscalCode, "TRRMRK92S17C351G");strcpy(regions[i].Hospital[n].patients[0].PatientName, "Mirko");strcpy(regions[i].Hospital[n].patients[0].PatientSurname, "Torrisi");regions[i].Hospital[n].patients[0].state=2;
+            regions[i].Hospital[n].patients[0].admissioDate.day = 17; regions[i].Hospital[n].patients[0].admissioDate.month = 1;regions[i].Hospital[n].patients[0].admissioDate.year = 2020;
+            strcpy(regions[i].Hospital[n].patients[1].FiscalCode, "GRNMDK70G21C351G");strcpy(regions[i].Hospital[n].patients[1].PatientName, "Carmelo");strcpy(regions[i].Hospital[n].patients[1].PatientSurname, "Caruso");regions[i].Hospital[n].patients[1].state=3;
+            regions[i].Hospital[n].patients[1].admissioDate.day = 10; regions[i].Hospital[n].patients[1].admissioDate.month = 3;regions[i].Hospital[n].patients[1].admissioDate.year = 2019;
+            strcpy(regions[i].Hospital[n].patients[2].FiscalCode, "GNILPN92S17D349Z");strcpy(regions[i].Hospital[n].patients[2].PatientName, "Eugenio");strcpy(regions[i].Hospital[n].patients[2].PatientSurname, "La Piana");regions[i].Hospital[n].patients[2].state=2;
+            regions[i].Hospital[n].patients[2].admissioDate.day = 6; regions[i].Hospital[n].patients[2].admissioDate.month = 4;regions[i].Hospital[n].patients[2].admissioDate.year = 2020;
+        }
+    }
+}
+ 
+//funzione main
+int main(){
+//come prima cosa carica tutte le celle vuote e conta i malati ( 0 )
+loadEmpty();
+countSick();
+//inizia il while true
+while (true)
+    {
+        int choice;
+        //menu principale con switch case
+        printf("\n[1] list of Regions [2] insert new region [3] insert new patient \n[4] find Hospital throught its code [5] find Region throught its code [6] New healed patient \n[7] get statistics [8] find Patient [9] Load regions and fake hospitals [0] quit");
+        scanf("%d", &choice);
+        switch (choice)
+        {
+        //lista di tutte le regioni, usa le funzioni printRegions e printHospitals
+        case 1:
+        {
+            printRegions();
+            printf("\n\npress region's number to visualize its hospitals, press another number to go back ");
+            int choReg;
+            scanf("%d", &choReg);
+            if(choReg >= numOfReg) break;
+            printHospitals(regions[choReg]);
+            int choice2;
+            printf("\n\n[1] Insert new hospital in this region [2] Go back ");
+            scanf("%d", &choice2);
+            switch(choice2){
+                case 1:
+                    insertHospital(choReg);
+                    break;
+                case 2:
+                    break;
+            }
+            break;
+        }
+        //inserimento di nuove regioni
+        case 2:
+        {
+            insertRegion();
+            break;
+        }
+        //cerca un nuovo paziente e lo inserisce se già non esiste
+        case 3:{
+            char fiscalCode[20];
+            printf("Insert patient's fiscal code: ");
+            scanf("%s", fiscalCode);
+            //controlla che non esiste un paziente con quel cf usando strcmp e la funzione findPatient
+            if(strcmp(findPatient(fiscalCode).FiscalCode, fiscalCode)){
+            insertPatient(fiscalCode);
+            countSick();
+            }
+            else{
+                //se esistye già il paziente avvisa
+                printf("this patient is already hospitalized");
+            }
+            break;
+        }
+        //cerca un ospedale usando il codice ospedale
+        case 4:{
+            char HospitalCode[5];
+            printf("\nInsert hospital code: ");
+            scanf("%s", &HospitalCode);
+            //chiama la funzione findHospital che restituisce un ospedale
+            Hosp chosenHosp = findOspital(HospitalCode);
+            //se l'ospedale risulta essere quello di controllo con nome '----' avvisa
+            if(!strcmp(chosenHosp.HospitalName, "----")){
+                printf("\n\n!!!!!There's no hospital in our database with such ID. Please try again (program is case sensitive).");
+            }
+            else{
+                printf("\n\nHospital name: %s ID: %s\nAddress: %s Manager: %s\nNumber of beds: %d Int Ter beds: %d\nTotal patients: %d (%d Subintensive therapy - %d Intensive Therapy)",
+                chosenHosp.HospitalName,
+                chosenHosp.HospitalCode,
+                chosenHosp.address,
+                chosenHosp.manager,
+                chosenHosp.beds,
+                chosenHosp.IntensiveTherapyBeds,
+                chosenHosp.TotPatientsHosp,
+                chosenHosp.subintHosp,
+                chosenHosp.intTerHosp);
+                int choice3;
+                printf("\n\n[1] show Patients - [2] Back");
+                scanf("%d", &choice3);
+                switch(choice3){
+                    case 1:{
+                        printPatients(chosenHosp);
+                        break;
+                    }
+                    case 2:{
+                        break;
+                    }
+                }
+            }
+            break;
+        }
+        //cerca una regione usando il codice regione
+        case 5:{
+            char RegCode[5];
+            printf("\n\nInsert region's code to show its hospitals and informations: ");
+            scanf("%s", &RegCode);
+            Region chosenReg = findRegion(RegCode);
+            if(!strcmp(chosenReg.RegName, "----")){
+                printf("No regions with the id provided, try again (case sensitive)");
+                break;
+            }
+            printf("%s - %s - pres %s - total sick people: %d | %d home | %d hosp | %d int ter | %d subint ter",
+            chosenReg.RegName,chosenReg.RegMainCity,chosenReg.president,chosenReg.sickTot,chosenReg.TotHomeHospReg,chosenReg.TotnormHospReg,chosenReg.ToTintTerReg,chosenReg.ToTsubintReg);
+            printf("\n\nTOTAL HOSPITALS IN THIS REGION: ");
+            for(int i = 0; i < numOfReg; i++){
+                if(!strcmp(regions[i].RegCode, chosenReg.RegCode)){
+                    printHospitals(regions[i]);
+                }
+            }
+            break;
+        }
+        //guarisce un paziente usando il suo CF
+        case 6:{
+            healedPatient();
+            break;
+        }
+        //funzioni statistiche
+        case 7:{
+            getStatistics();
+            break;
+        }
+        //cerca un paziente usando il codice fiscale
+        case 8:
+        {
+            char fiscalCode[20];
+            printf("Insert patient's fiscal code: ");
+            scanf("%s", fiscalCode);
+            //cerca un paziente usando la funzione findPatient e lo assegna a una variabile (così non ripete due volte la ricerca)
+            Sick foundPatient = findPatient(fiscalCode);
+            //controlla che non esiste un paziente con quel cf usando strcmp e la funzione findPatient
+            if(!strcmp(foundPatient.FiscalCode, "----")){
+                printf("no patients found with this fiscal code, try again (program is case sensitive).");
+            }
+            else{
+                printPatient(foundPatient);
+            }
+        }
+        //precaricamento di dati falsi
+        case 9:
+        {
+            fakeLoad();
+            countSick();
+            break;
+        }
+        //uscita dal programma
+        case 0:{
+            return 0;
+        }
+        }
+    }
+    return 0;
+}
