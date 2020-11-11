@@ -1,3 +1,0 @@
-ANSI C
-Exercites
-
