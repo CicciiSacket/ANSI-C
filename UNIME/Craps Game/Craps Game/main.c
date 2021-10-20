@@ -15,6 +15,7 @@ int roll_dice(void) { //Genera due numeri casuali da tra 1 e 6 e ne restituisce 
 
 bool play_game(void) { //Gioca la partita chiamando roll_dice, visualizza gli esiti dei vari lanci e ritorna true se l'utente vince altrimenti false;
     int sum = roll_dice();
+    printf("Your sum is: %d \n", sum);
     if (sum == 7 || sum == 11) {
         return true;
     }
@@ -31,8 +32,8 @@ bool play_game(void) { //Gioca la partita chiamando roll_dice, visualizza gli es
 }
 
 int main(int argc, const char * argv[]) { //Tiene conto delle vittorie e delle sconfitte chiamando play_game e chiedendo se si vuole giocare ancora
-    play_game();
-    if(play_game() == true) {
+    bool game = play_game();
+    if(game == true) {
         printf("User win \n");
     }
     else {
