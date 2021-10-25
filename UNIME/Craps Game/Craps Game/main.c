@@ -1,5 +1,5 @@
 //
-//  Craps Game
+//  Craps Game [Book exercise]
 //  Created by Francesco_Utility on 18/10/21.
 //
 
