@@ -1,7 +1,5 @@
 //
-//  main.c
-//  Craps Game [Se la somma dei dadi è 7 oppure 11 user vince, user perde se la somma è 2 o 3; Qualsiasi altra uscita prende il nume di "punto" e il gioco continua, si arriva alla vittoria se esce di nuovo il punto mentre si perde se esce il 7.]
-//
+//  Craps Game [Page xxx Exercise number xxx]
 //  Created by Francesco_Utility on 18/10/21.
 //
 
@@ -9,13 +7,13 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-int roll_dice(void) { //Genera due numeri casuali da tra 1 e 6 e ne restituisce la somma
+int roll_dice(void) {
     return((rand() % 7) + (rand() % 7));
 }
 
-bool play_game(void) { //Gioca la partita chiamando roll_dice, visualizza gli esiti dei vari lanci e ritorna true se l'utente vince altrimenti false;
+bool Game(void) {
     int sum = roll_dice();
-    printf("Your sum is: %d \n", sum);
+    printf("\nYour sum is: %d \n", sum);
     if (sum == 7 || sum == 11) {
         return true;
     }
@@ -31,12 +29,38 @@ bool play_game(void) { //Gioca la partita chiamando roll_dice, visualizza gli es
     return false;
 }
 
-int main(int argc, const char * argv[]) { //Tiene conto delle vittorie e delle sconfitte chiamando play_game e chiedendo se si vuole giocare ancora
-    bool game = play_game();
+char PrintResult(void) {
+    bool game = Game();
     if(game == true) {
-        printf("User win \n");
+        return 'W';
     }
     else {
+        return 'L';
+    }
+}
+
+int PlayGame(void) {
+    char printResult = PrintResult();
+    if(printResult == 'W') {
+        printf("User win \n");
+    }
+    else if (printResult == 'L'){
         printf("User lose \n");
     }
+    char choose;
+    printf("Another play? \n" );
+    scanf("%s",&choose);
+    if (choose == 'y'|| choose == 'Y' ) {
+       PlayGame();
+    }
+    if (choose == 'n' || choose == 'N') {
+        return 0;
+    }
+    else {
+        return 0;
+    }
+}
+
+int main(int argc, const char * argv[]) {
+    PlayGame();
 }
