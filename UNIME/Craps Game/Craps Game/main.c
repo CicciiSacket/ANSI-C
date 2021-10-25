@@ -1,5 +1,5 @@
 //
-//  Craps Game [Page xxx Exercise number xxx]
+//  Craps Game
 //  Created by Francesco_Utility on 18/10/21.
 //
 
@@ -29,31 +29,28 @@ bool Game(void) {
     return false;
 }
 
-char PrintResult(void) {
+int PlayGame(int win, int lose) {
     bool game = Game();
     if(game == true) {
-        return 'W';
+        win+=1;
+       printf("User win\n");
     }
     else {
-        return 'L';
+        lose+=1;
+        printf("User lose\n");
     }
-}
-
-int PlayGame(void) {
-    char printResult = PrintResult();
-    if(printResult == 'W') {
-        printf("User win \n");
-    }
-    else if (printResult == 'L'){
-        printf("User lose \n");
-    }
+    
+    printf("Current victories: %d\n",win);
+    printf("Current defeats: %d\n",lose);
+    
     char choose;
-    printf("Another play? \n" );
+    printf("\nAnother play? \n" );
     scanf("%s",&choose);
     if (choose == 'y'|| choose == 'Y' ) {
-       PlayGame();
+       PlayGame(win,lose);
     }
     if (choose == 'n' || choose == 'N') {
+        printf("\nGoodbay!\n\n" );
         return 0;
     }
     else {
@@ -62,5 +59,8 @@ int PlayGame(void) {
 }
 
 int main(int argc, const char * argv[]) {
-    PlayGame();
+    int win = 0;
+    int lose = 0;
+    printf("Welcome to Craps Game!\n" );
+    PlayGame(win,lose);
 }
