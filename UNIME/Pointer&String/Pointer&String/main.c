@@ -9,12 +9,24 @@
 #include <string.h>
 
 
-char * single_name(char *list[], char name[], int N){
+char * single_name(char *list[], char name[], int N){ //Torna se esiste il nome che cerchiamo
     static char E[] = "Name not found\n";
     for (int i=0; i < N ; i++) {
         if (strcmp(list[i], name) == 0){
             return list[i];
         }
+    }
+    return E;
+}
+
+char * list_name(char *list[], int N) { //Torna gli N elementi dell'array
+    static char E[] = "Lista vuota";
+    static char R[] = "";
+    if ( N > 0) {
+        for (int i=0; i < N; i++) {
+                printf("%s\n", list[i]);
+        }
+        return R;
     }
     return E;
 }
@@ -39,30 +51,28 @@ int main(int argc, const char * argv[]) {
 
 
     for (int i=0; i < (sizeof(list)/sizeof(list[0])) ; i++) {
-            printf("%s\n", list[i]); //Torna gli elementi dell'array
+            printf("%s\n", list[i]); //Torna tutti gli elementi dell'array
     }
 
-    printf("\n\n\n");
-    char name[15];
-    for (int i=0; i < (sizeof(list)/sizeof(list[0])) ; i++) {
-        strcpy(name, list[i]);
-        printf("%s\n",name); //Torna gli elementi dell'array dopo la modifica con strcpy
-    }
+//    printf("\n\n\n");
+//    char name[15];
+//    for (int i=0; i < (sizeof(list)/sizeof(list[0])) ; i++) {
+//        strcpy(name, list[i]);
+//        printf("%s\n",name); //Torna gli elementi dell'array dopo la modifica con strcpy
+//    }
 
-    printf("\n\n\n");
-    char pluto[] = "Francesco" ;
-    for (int i=0; i < (sizeof(list)/sizeof(list[0])) ; i++) {
-        if (strcmp(list[i], pluto) == 0){
-            printf("%s\t è il nome inserito\n", list[i]);
-        }
-    }
-    printf("\n\n\n");
+//    printf("\n\n\n");
+//    char pluto[] = "Francesco" ;
+//    for (int i=0; i < (sizeof(list)/sizeof(list[0])) ; i++) {
+//        if (strcmp(list[i], pluto) == 0){
+//            printf("%s\t è il nome inserito\n", list[i]);
+//        }
+//    }
     
+    
+    printf("\n\n\n");
     printf("%s\n\n",single_name(list,"Lucia",10));
-    
-    
-    
-    
-    
+    printf("\n\n\n");
+    printf("%s\n", list_name(list,2));
     return 0;
 }
