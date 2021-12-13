@@ -20,15 +20,22 @@ char * single_name(char *list[], char name[], int N){ //Torna se esiste il nome 
 }
 
 char * list_name(char *list[], int N) { //Torna gli N elementi dell'array
-    static char E[] = "Lista vuota";
+    static char E[] = "404";
+    static char Er[] = "Lista vuota";
     static char R[] = "";
-    if ( N > 0) {
+    int Out_Of_Bound = (sizeof(list)/sizeof(list[0]));
+    
+    if (N > Out_Of_Bound){
+        return E;
+    }
+    
+    if (N > 0) {
         for (int i=0; i < N; i++) {
                 printf("%s\n", list[i]);
         }
         return R;
     }
-    return E;
+    return Er;
 }
 
 
@@ -73,6 +80,6 @@ int main(int argc, const char * argv[]) {
     printf("\n\n\n");
     printf("%s\n\n",single_name(list,"Lucia",10));
     printf("\n\n\n");
-    printf("%s\n", list_name(list,2));
+    printf("%s\n", list_name(list,3));
     return 0;
 }
