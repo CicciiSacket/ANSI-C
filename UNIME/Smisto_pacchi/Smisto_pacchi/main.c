@@ -19,7 +19,7 @@ typedef struct package { //Etichetta del singolo pacco;
 } package;
 
 struct column_A { //Colonna che contiene i pacchi specifici;
-    package Tape_A[SIZE_TAPE]; //Nastro per i pacchi difettosi e da incenerire;
+    package Tape_A[SIZE_TAPE]; //Nastro per i pacchi in ingresso;
     struct column_A *next;
 };
 
@@ -54,51 +54,39 @@ FILE * open_fileManager(char pattern[]) { //Apre il file in lettura e scrittura;
     return fp;
 }
 
-void write_fileManager(FILE *fp,package *package) { //Scrittura sul file del contenuto specifico
-    fprintf(fp, "ID: %s\t  Type: %u\n", package->ID,package->TypePackage);
+void write_fileManager_IN(FILE *fp,package *package, typePackage typePackage) { //Scrittura sul file del pacco e della sua tipologia
+    fprintf(fp, "IN -> ID: %s\t  Type: %u\n", package->ID, typePackage);
 }
 
 // ---------------------- //
 
-struct column_A *add_to_list(struct column_A *list, struct package package) { //Si aggiunge un pacco alla colonna A, corrispondente ad i pacchi in ingresso;
-    struct column_A *new_pack;
-    new_pack = malloc(sizeof(struct column_A));
-    if (new_pack == NULL) {
-        printf("%s","Error");
-        exit(EXIT_FAILURE);
-    }
-    new_pack->Tape_A[SIZE_TAPE - 1] = package; //Ogni pacco che arriva finisce in fondo al nastro;
-    new_pack->next = list;
-    return new_pack;
-}
-
-void all_values_list_A(struct column_A *list) {
-    struct column_A *i;
-    for (i = list; i != NULL; i = i->next) {
-        for (int j = SIZE_TAPE;j == 0; j--) {
-            printf("%s\n", i->Tape_A[j].ID);
-        }
-    }
-}
-
-
+//struct column_A *add_to_list_A(struct column_A *list, struct package package) { //Si aggiunge un pacco alla colonna A, corrispondente ad i pacchi in ingresso;
+//    //non devo creare un nuovo column A come in esempio che seguivo prima ma aggiungere nell'array della colonna.....
+//}
 
 int main(int argc, const char * argv[]) {
-//    struct column_A *first_A = NULL; //Punto iniziale della colonna A;
+//    FILE *fp = open_fileManager("/Users/Francesco_Utility/Desktop/Programmazione_I/ANSI-C/UNIME/Smisto_pacchi/Smisto_pacchi/Register.txt");
+    
+
+    struct column_A *first_A = NULL; //Punto iniziale della colonna A;
 //    struct column_B *first_B = NULL; //Punto iniziale della colonna B;
 //    struct column_C *first_C = NULL; //Punto iniziale della colonna C;
 //    struct column_D *first_D = NULL; //Punto iniziale della colonna D;
+    struct package *packegeTest = {"AA000A0", "0000A", 3.56, regular};
+    struct package *packegeTest2 = {"AA000A2", "0000A", 3.56, regular};
+    struct package *packegeTest3 = {"AA000A3", "0000A", 3.56, regular};
+    first_A = add_to_list_A(first_A, *packegeTest3);
+    first_A = add_to_list_A(first_A, *packegeTest2);
+    first_A = add_to_list_A(first_A, *packegeTest3);
+
     
-            
-//    FILE *fp = open_fileManager("/Users/Francesco_Utility/Desktop/Programmazione_I/ANSI-C/UNIME/Smisto_pacchi/Smisto_pacchi/Register.txt");
+
+//    write_fileManager_IN(fp,packegeTest,regular);
     
-    
-//    struct package *packegeTest = {"AA000A0", "0000A", 3.56, regular};
-//    first_A = add_to_list(first_A, *packegeTest);
-//    printf("%s", first_A->Tape_A[SIZE_TAPE - 1].ID);
-//    printf("%u\n", packegeTest->TypePackage);
-//    write_fileManager(fp,packegeTest);
-    
+//    for (int i = 0; i < sizeof(first_A->Tape_A)/sizeof(first_A->Tape_A[0]); i++) {
+//        printf("%s\n", first_A->Tape_A[i].ID);
+//    }
+    printf("%s\n", first_A->Tape_A[2].ID);
 
     
     
