@@ -25,6 +25,28 @@ struct node *add_to_list(struct node *list, int data) {
     return new_node;
 }
 
+struct node *add_to_list_order(struct node *head_list, int data) { //Aggiunta di un elemento in maniera ordinata
+    struct node *r = head_list, *q = head_list; //predecessore e successore del nuovo elemento;
+    struct node *new_node;
+    new_node = malloc(sizeof(struct node));
+    if (new_node == NULL) {
+        printf("%s","Error");
+        exit(EXIT_FAILURE);
+    }
+    new_node->data = data;
+    while ((q != NULL) && (q->data < new_node->data)) {
+        r = q;
+        q = q->next;
+    }
+    if (r == q) {
+        head_list = new_node;
+    }
+    else
+        r->next = new_node;
+    new_node->next = q;
+    return head_list;
+}
+
 void all_values_list(struct node *list) {
     struct node*i;
     for (i = list; i != NULL; i = i->next) {
@@ -61,9 +83,10 @@ struct node *delete_in_list(struct node *list, int data) {
 
 int main(int argc, const char * argv[]) {
     struct node *first = NULL;
-    first = add_to_list(first, 10);
-    first =  add_to_list(first, 14);
-    first =  add_to_list(first, 24);
+    first = add_to_list_order(first, 10);
+    first =  add_to_list_order(first, 14);
+    first =  add_to_list_order(first, 24);
+    first = add_to_list_order(first, 22);
     printf("%d\n", first->data); //ultimo, che in realtà è primo, valore della lista;
     
     printf("\n\n");
