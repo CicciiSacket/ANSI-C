@@ -12,17 +12,23 @@
 
 typedef enum typePackage { defective , regular } typePackage; //Stabilisce se il pacco è da incenerire o meno;
 
-typedef struct package { //Etichetta del singolo pacco;
+typedef struct Package { //Etichetta del singolo pacco;
     char ID[7];
     char ID_Destination[5];
     float Weight;
     typePackage TypePackage;
 } package;
 
-struct Tape { //Nastro per i pacchi;
+typedef struct Tape { //Nastro per i pacchi;
     package TapePackage;
     struct Tape *next;
-};
+} Tape;
+
+typedef struct Column { //Colonna per i pacchi;
+    package Package;
+    struct Column *next;
+} Column;
+
 
 int create_fileManager(char pattern[]) { //Crea il file in lettura e scrittura;
     FILE *fp = fopen(pattern, "w+");
@@ -40,16 +46,20 @@ FILE * open_fileManager(char pattern[]) { //Apre il file in lettura e scrittura;
     return fp;
 }
 
-void write_fileManager_IN(FILE *fp,package *package, typePackage typePackage) { //Scrittura sul file del pacco e della sua tipologia
+void write_fileManager_IN(FILE *fp,package *package, typePackage typePackage) { //Scrittura sul file del pacco e della sua tipologia quando arriva in ingresso
     fprintf(fp, "IN -> ID: %s\t  Type: %u\n", package->ID, typePackage);
 }
 
-void write_fileManager_OUT(FILE *fp,package *package, typePackage typePackage) { //Scrittura sul file del pacco e della sua tipologia
+void write_fileManager_OUT(FILE *fp,package *package, typePackage typePackage) { //Scrittura sul file del pacco e della sua tipologia quando in spedizione
     fprintf(fp, "OUT -> ID: %s\t  Type: %u\n", package->ID, typePackage);
+}
+
+void write_fileManager_F(FILE *fp,package *package, typePackage typePackage) { //Scrittura sul file del pacco da incenerire
+    fprintf(fp, "FIRE -> ID: %s\t  Type: %u\n", package->ID, typePackage);
 }
 // ---------------------- //
 
-struct Tape *add_to_tape(struct Tape *list, struct package *package) { //Aggiunge il pacco al nastro specifico
+struct Tape *add_to_tape(struct Tape *list, struct Package *package) { //Aggiunge il pacco al nastro specifico
     struct Tape *new_node;
     new_node = malloc(sizeof(struct Tape));
     if (new_node == NULL) {
@@ -61,7 +71,7 @@ struct Tape *add_to_tape(struct Tape *list, struct package *package) { //Aggiung
     return new_node;
 }
 
-struct Tape *search_in_list(struct Tape *list, struct package *package) {
+struct Tape *search_in_list(struct Tape *list, struct Package *package) { //Cerca il pacco sul nastro
     for (; list != NULL; list = list->next) {
         if (strcmp(list->TapePackage.ID, package->ID) == 0) {
             return list;
@@ -70,57 +80,66 @@ struct Tape *search_in_list(struct Tape *list, struct package *package) {
     return NULL;
 }
 
-void all_packages_Tape(struct Tape *list) {
+void all_packages_tape(struct Tape *list) { //View per tutti i pacchi presenti su nastro
     struct Tape *i;
     for (i = list; i != NULL; i = i->next) {
         printf("%s\n", i->TapePackage.ID);
     }
 }
 
-int get_in_category(struct Tape *list, struct package category[], struct package *package,char IdPackage[7]) { //Sposto un pacco dal nastro opportuno alla categoria opportuna
-    struct Tape *search = search_in_list(list, package);
+struct Column *get_in_category(struct Tape *list, struct Column *column, struct Package *package) { //Sposto un pacco dal nastro opportuno alla colonna opportuna
+    struct Tape *search = search_in_list(list,package);
     if (search == NULL) {
-        return 404;
+        exit(404); //Se non esiste il pacco sul nastro;
+    }
+    struct Column *new_node;
+    new_node = malloc(sizeof(struct Column));
+    if (new_node == NULL) {
+        printf("%s","Error");
+        exit(EXIT_FAILURE);
+    }
+    new_node->Package = *package;
+    new_node->next = column;
+    return new_node;
+}
+
+void all_package_in_column(struct Column *list) { //Visualizza i pacchi nella colonna;
+    struct Column *i;
+    for (i = list; i != NULL; i = i->next) {
+        printf("%s\n", i->Package.ID);
     }
 }
 
-void all_package_in_category(struct package category[]) { //Visualizza i pacchi nella categoria;
-        for (int i = 0; i > SIZE_TAPE; i++) {
-            printf("%s\n",category[i].ID);
-        }
+struct Package *generate_package (char ID[], char id_destination[], float weight, typePackage typePackage) { //Inizializzazione pacco
+    struct Package *package = {ID,id_destination,weight,typePackage};
+    return package;
 }
 
-
-
+/* MAIN */
 int main(int argc, const char * argv[]) {
-//    FILE *fp = open_fileManager("/Users/Francesco_Utility/Desktop/Programmazione_I/ANSI-C/UNIME/Smisto_pacchi/Smisto_pacchi/Register.txt");
+    FILE *fp = open_fileManager("/Users/Francesco_Utility/Desktop/Programmazione_I/ANSI-C/UNIME/Smisto_pacchi/Smisto_pacchi/Register.txt");
+
+    struct Package *packageTest = generate_package("AA000AA","000A",3.59,defective);
+
+    struct Column *Column_A = NULL; //Colonna con i pacchi in spedizione;
+    struct Column *Column_B = NULL;; //Colonna i pacchi in attesa di;
+    struct Column *Column_C = NULL;; //Colonna con i pacchi da incenerire;
+
+    struct Tape *Tape_A = NULL; //Lista corrispondente al nastro A; [In ingresso]
+    struct Tape *Tape_B = NULL; //Lista corrispondente al nastro B; [In spedizione]
+    struct Tape *Tape_C = NULL; //Lista corrispondente al nastro C; [Da incenerire]
+    struct Tape *Tape_D = NULL; //Lista corrispondente al nastro D; [In attesa di..]
+
     
-    struct package *packageTest = {"AA000AA","000A",3.59,defective};
-
-//    struct package category_A[SIZE_TAPE]; //Categoria con i pacchi in spedizione; [ Non colonna perchè non sono spediti in ordine di arrivo al magazzino i pacchi :| ]
-//    struct package category_B[SIZE_TAPE]; //Categoriacon i pacchi in attesa di;
-    struct package *category_C[SIZE_TAPE]; //Categoria con i pacchi da incenerire;
-
-    struct Tape *Tape_A = NULL; //Lista corrispondente al nastro A;
-    struct Tape *Tape_D = NULL; //Lista corrispondente al nastro D;
-
     Tape_A = add_to_tape(Tape_A, packageTest); //Aggiungo il pacco sul nastro A;
-//    write_fileManager_IN(fp,packageTest,regular); //Scrivo che è entrato un nuovo pacco;
-    printf("%s\n","I pacchi in ingresso sono:\n");
-    all_packages_Tape(Tape_A); //Visualizzo i pacchi presenti sul nastro A;
-    Tape_D = add_to_tape(Tape_D,packageTest);//Sposto nel nastro dell'inceneritore il pacco difettoso;
-    printf("%s\n","Il pacco selezionato è stato spostato nel nastro D");
-    printf("%s\n","I pacchi nel nastro D sono:\n");
-    all_packages_Tape(Tape_D); //Visualizzo i pacchi sul nastro dell'inceneritore;
-
-    printf("\n\n\n");
-    printf("%d\n",get_in_category(Tape_D, category_C, packageTest,"AA000AA"));//sposto il pacco nella categoria da incenerire
-    printf("%s\n","Il pacco selezionato sarà presto incenerito");
-    printf("\n%s\n", "I pacchi da incenerire sono:");
-
-        
-
-
+    write_fileManager_IN(fp,packageTest,defective); //Scrivo che è entrato un nuovo pacco;
+    all_packages_tape(Tape_A); //Visualizzo i pacchi presenti sul nastro A;
+    Tape_D = add_to_tape(Tape_D,packageTest);//Sposto nel nastro verso l'inceneritore il pacco difettoso;
+    all_packages_tape(Tape_D); //Visualizzo i pacchi sul nastro dell'inceneritore;
+    Column_C = get_in_category(Tape_D, Column_C, packageTest); //Sposto il pacco nella colonna da incenerire;
+    write_fileManager_F(fp, packageTest, defective); //Scrivo che il pacco si sposta dal nastro alla colonna dell'inceneritore;
+    all_package_in_column(Column_C); //Visualizzo tutti i pacchi presenti nella colonna da incenerire;
+    
     return 0;
 }
 //All'arrivo del pacco print delle specifiche - porlo nella colonna corrispondente(scrivendo che il pacco è OUT se deve uscire o Fire se deve bruciare) e di conseguenza prima nel nastro corrispondente - registrare l'ingresso del pacco sul file
