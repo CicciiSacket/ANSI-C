@@ -59,8 +59,22 @@ void write_fileManager_F(FILE *fp,package *package, typePackage typePackage) { /
 }
 // ---------------------- //
 
+struct Tape *search_in_list(struct Tape *list, struct Package *package) { //Cerca il pacco sul nastro
+    for (; list != NULL; list = list->next) {
+        if (strcmp(list->TapePackage.ID, package->ID) == 0) {
+            return list;
+        }
+    }
+    return NULL;
+}
+
 struct Tape *add_to_tape(struct Tape *list, struct Package *package) { //Aggiunge il pacco al nastro specifico
+    struct Tape *duplicate = search_in_list(list, package);
     struct Tape *new_node;
+    if (duplicate) {
+        printf("%s","Already exist\n");
+        return duplicate;
+    }
     new_node = malloc(sizeof(struct Tape));
     if (new_node == NULL) {
         printf("%s","Error");
@@ -69,15 +83,6 @@ struct Tape *add_to_tape(struct Tape *list, struct Package *package) { //Aggiung
     new_node->TapePackage = *package;
     new_node->next = list;
     return new_node;
-}
-
-struct Tape *search_in_list(struct Tape *list, struct Package *package) { //Cerca il pacco sul nastro
-    for (; list != NULL; list = list->next) {
-        if (strcmp(list->TapePackage.ID, package->ID) == 0) {
-            return list;
-        }
-    }
-    return NULL;
 }
 
 void all_packages_tape(struct Tape *list) { //View per tutti i pacchi presenti su nastro
@@ -133,7 +138,7 @@ struct Tape *delete_in_tape(struct Tape *list, struct Package *package) {
 
 /* MAIN */
 int main(int argc, const char * argv[]) {
-    FILE *fp = open_fileManager("/Users/Francesco_Utility/Desktop/Programmazione_I/ANSI-C/UNIME/Smisto_pacchi/Smisto_pacchi/Register.txt");
+//    FILE *fp = open_fileManager("/Users/Francesco_Utility/Desktop/Programmazione_I/ANSI-C/UNIME/Smisto_pacchi/Smisto_pacchi/Register.txt");
 
     struct Package *packageTest = generate_package("AA000AA","000A",3.59,defective);
 
@@ -147,20 +152,22 @@ int main(int argc, const char * argv[]) {
     struct Tape *Tape_D = NULL; //Lista corrispondente al nastro D; [In attesa di..]
 
     
+    
     Tape_A = add_to_tape(Tape_A, packageTest); //Aggiungo il pacco sul nastro A;
-    write_fileManager_IN(fp,packageTest,defective); //Scrivo che è entrato un nuovo pacco;
-    all_packages_tape(Tape_A); //Visualizzo i pacchi presenti sul nastro A;
-    Tape_D = add_to_tape(Tape_D,packageTest);//Sposto nel nastro verso l'inceneritore il pacco difettoso;
-    printf("\n%s\n", "Il nastro A adesso ha:");
     all_packages_tape(Tape_A);
-    Tape_A = delete_in_tape(Tape_A, packageTest); //Rimuovo dal nastro A;
-    printf("\n%s\n", "Il nastro A adesso ha:");
+    printf("\n");
+    Tape_A = add_to_tape(Tape_A, packageTest); //Aggiungo il pacco sul nastro A;
     all_packages_tape(Tape_A);
     printf("\n\n\n");
-    all_packages_tape(Tape_D); //Visualizzo i pacchi sul nastro dell'inceneritore;
-    Column_C = get_in_category(Tape_D, Column_C, packageTest); //Sposto il pacco nella colonna da incenerire;
-    write_fileManager_F(fp, packageTest, defective); //Scrivo che il pacco si sposta dal nastro alla colonna dell'inceneritore;
-    all_package_in_column(Column_C); //Visualizzo tutti i pacchi presenti nella colonna da incenerire;
+    
+//    write_fileManager_IN(fp,packageTest,defective); //Scrivo che è entrato un nuovo pacco;
+//    all_packages_tape(Tape_A); //Visualizzo i pacchi presenti sul nastro A;
+//    Tape_D = add_to_tape(Tape_D,packageTest);//Sposto nel nastro verso l'inceneritore il pacco difettoso;
+//    Tape_A = delete_in_tape(Tape_A, packageTest); //Rimuovo dal nastro A;
+//    all_packages_tape(Tape_D); //Visualizzo i pacchi sul nastro dell'inceneritore;
+//    Column_C = get_in_category(Tape_D, Column_C, packageTest); //Sposto il pacco nella colonna da incenerire;
+//    write_fileManager_F(fp, packageTest, defective); //Scrivo che il pacco si sposta dal nastro alla colonna dell'inceneritore;
+//    all_package_in_column(Column_C); //Visualizzo tutti i pacchi presenti nella colonna da incenerire;
     
     return 0;
 }

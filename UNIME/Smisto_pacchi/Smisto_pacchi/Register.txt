@@ -8,3 +8,5 @@ IN -> ID: AA000AA	  Type: 0
 FIRE -> ID: AA000AA	  Type: 0
 IN -> ID: AA000AA	  Type: 0
 FIRE -> ID: AA000AA	  Type: 0
+IN -> ID: AA000AA	  Type: 0
+FIRE -> ID: AA000AA	  Type: 0
