@@ -62,7 +62,7 @@ void write_fileManager_F(FILE *fp,package *package, typePackage typePackage) { /
 }
 // ---------------------- //
 
-struct Tape *search_in_list(struct Tape *list, struct Package *package) { //Cerca il pacco sul nastro
+struct Tape *search_in_tape(struct Tape *list, struct Package *package) { //Cerca il pacco sul nastro
     for (; list != NULL; list = list->next) {
         if (strcmp(list->TapePackage.ID, package->ID) == 0) {
             return list;
@@ -71,8 +71,18 @@ struct Tape *search_in_list(struct Tape *list, struct Package *package) { //Cerc
     return NULL;
 }
 
+struct Column *search_in_column(struct Column *list, struct Package *package) { //Cerca il pacco nella colonna
+    for (; list != NULL; list = list->next) {
+        if (strcmp(list->Package.ID, package->ID) == 0) {
+            return list;
+        }
+    }
+    return NULL;
+}
+
+
 struct Tape *add_to_tape(struct Tape *list, struct Package *package) { //Aggiunge il pacco al nastro specifico
-    struct Tape *duplicate = search_in_list(list, package);
+    struct Tape *duplicate = search_in_tape(list, package);
     struct Tape *new_node;
     if (duplicate) {
         printf("%s","Already exist\n");
@@ -95,10 +105,15 @@ void all_packages_tape(struct Tape *list) { //View per tutti i pacchi presenti s
     }
 }
 
-struct Column *get_in_category(struct Tape *list, struct Column *column, struct Package *package) { //Sposto un pacco dal nastro opportuno alla colonna opportuna
-    struct Tape *search = search_in_list(list,package);
+struct Column *get_in_column(struct Tape *list, struct Column *column, struct Package *package) { //Sposto un pacco dal nastro opportuno alla colonna opportuna
+    struct Tape *search = search_in_tape(list,package);
     if (search == NULL) {
         exit(404); //Se non esiste il pacco sul nastro;
+    }
+    struct Column *duplicate = search_in_column(column, package);
+    if (duplicate) {
+        printf("%s","Already exist\n");
+        return duplicate;
     }
     struct Column *new_node;
     new_node = malloc(sizeof(struct Column));
@@ -156,7 +171,7 @@ struct Column *delete_in_column(struct Column *list, struct Package *package) {
 
 /* MAIN */
 int main(int argc, const char * argv[]) {
-    FILE *fp = open_fileManager("/Users/Francesco_Utility/Desktop/Programmazione_I/ANSI-C/UNIME/Smisto_pacchi/Smisto_pacchi/Register.txt");
+//    FILE *fp = open_fileManager("/Users/Francesco_Utility/Desktop/Programmazione_I/ANSI-C/UNIME/Smisto_pacchi/Smisto_pacchi/Register.txt");
 
     struct Package *packageTest = generate_package("AA000AA","000A",3.59,defective);
 
@@ -171,16 +186,15 @@ int main(int argc, const char * argv[]) {
 
     
     Tape_A = add_to_tape(Tape_A, packageTest); //Aggiungo il pacco sul nastro A;
-    write_fileManager_IN(fp,packageTest,defective); //Scrivo che è entrato un nuovo pacco;
+//    write_fileManager_IN(fp,packageTest,defective); //Scrivo che è entrato un nuovo pacco;
     all_packages_tape(Tape_A); //Visualizzo i pacchi presenti sul nastro A;
     Tape_D = add_to_tape(Tape_D,packageTest);//Sposto nel nastro verso l'inceneritore il pacco difettoso;
     Tape_A = delete_in_tape(Tape_A, packageTest); //Rimuovo dal nastro A;
     all_packages_tape(Tape_D); //Visualizzo i pacchi sul nastro dell'inceneritore;
-    Column_C = get_in_category(Tape_D, Column_C, packageTest); //Sposto il pacco nella colonna da incenerire;
-    write_fileManager_F(fp, packageTest, defective); //Scrivo che il pacco si sposta dal nastro alla colonna dell'inceneritore;
+    Column_C = get_in_column(Tape_D, Column_C, packageTest); //Sposto il pacco nella colonna da incenerire;
+//    write_fileManager_F(fp, packageTest, defective); //Scrivo che il pacco si sposta dal nastro alla colonna dell'inceneritore;
     all_package_in_column(Column_C); //Visualizzo tutti i pacchi presenti nella colonna da incenerire;
     Column_C = delete_in_column(Column_C, packageTest); //Rimuovo dalla colonna il pacco che è stato incenerito;
-
 
     return 0;
 }
