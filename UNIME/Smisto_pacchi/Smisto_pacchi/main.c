@@ -115,6 +115,22 @@ struct Package *generate_package (char ID[], char id_destination[], float weight
     return package;
 }
 
+struct Tape *delete_in_tape(struct Tape *list, struct Package *package) {
+    struct Tape *prev,*cur;
+    for (cur = list, prev = NULL; cur != NULL && strcmp(cur->TapePackage.ID, package->ID) != 0 ; prev = cur, cur = cur->next);
+    if (cur == NULL) {
+        return list; // Non esiste un nodo con data;
+    }
+    if (prev == NULL) {
+        list = list->next; // Data si trova nel primo nodo; [con questa istruzione si altera il nodo precedente in modo da bypassare il nodo eliminato]
+    }
+    else
+        prev->next = cur->next; // Data si trova in un qualunque altro nodo della lista;
+    free(cur); // Si rilascia lo spazio di memoria occupato dal nodo eliminato;
+    return list;
+}
+
+
 /* MAIN */
 int main(int argc, const char * argv[]) {
     FILE *fp = open_fileManager("/Users/Francesco_Utility/Desktop/Programmazione_I/ANSI-C/UNIME/Smisto_pacchi/Smisto_pacchi/Register.txt");
@@ -135,6 +151,12 @@ int main(int argc, const char * argv[]) {
     write_fileManager_IN(fp,packageTest,defective); //Scrivo che è entrato un nuovo pacco;
     all_packages_tape(Tape_A); //Visualizzo i pacchi presenti sul nastro A;
     Tape_D = add_to_tape(Tape_D,packageTest);//Sposto nel nastro verso l'inceneritore il pacco difettoso;
+    printf("\n%s\n", "Il nastro A adesso ha:");
+    all_packages_tape(Tape_A);
+    Tape_A = delete_in_tape(Tape_A, packageTest); //Rimuovo dal nastro A;
+    printf("\n%s\n", "Il nastro A adesso ha:");
+    all_packages_tape(Tape_A);
+    printf("\n\n\n");
     all_packages_tape(Tape_D); //Visualizzo i pacchi sul nastro dell'inceneritore;
     Column_C = get_in_category(Tape_D, Column_C, packageTest); //Sposto il pacco nella colonna da incenerire;
     write_fileManager_F(fp, packageTest, defective); //Scrivo che il pacco si sposta dal nastro alla colonna dell'inceneritore;
