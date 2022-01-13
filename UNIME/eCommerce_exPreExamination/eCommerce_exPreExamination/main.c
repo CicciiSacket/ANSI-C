@@ -14,7 +14,7 @@
 typedef enum category { Telephone, Watch, Armchairs } category; //Categorie;
 
 typedef struct object_site { //Oggetti del sito web;
-    char ID[SIZE_ID];
+    char * ID;
     category category;
     float price;
     struct object_site *next;
@@ -33,10 +33,7 @@ struct objs *add_to_site(struct objs *head_list, char id[SIZE_ID], enum category
         printf("%s","Error");
         exit(EXIT_FAILURE);
     }
-    int i = 0;
-    while (i > SIZE_ID) {
-        new_node->object_site.ID[i] = id[i];
-    }
+    new_node->object_site.ID = id;
     new_node->object_site.category = category;
     new_node->object_site.price = price;
     while ((q != NULL) && (q->object_site.price < new_node->object_site.price)) { //Prezzo in ordine crescente;
