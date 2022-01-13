@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #define SIZE_ID 7
 #define ETW 20 //Element to write -> Elementi da leggere
 
@@ -19,6 +20,46 @@ typedef struct object_site { //Oggetti del sito web;
     struct object_site *next;
 } object_site;
 
+typedef struct objs {
+    object_site object_site;
+    struct objs *next;
+}objs;
+
+struct objs *add_to_site(struct objs *head_list, char id[SIZE_ID], enum category category, float price) { //Aggiunta di un elemento in maniera ordinata in base al prezzo
+    struct objs *r = head_list, *q = head_list; //predecessore e successore del nuovo elemento;
+    struct objs *new_node;
+    new_node = malloc(sizeof(struct object_site));
+    if (new_node == NULL) {
+        printf("%s","Error");
+        exit(EXIT_FAILURE);
+    }
+    int i = 0;
+    while (i > SIZE_ID) {
+        new_node->object_site.ID[i] = id[i];
+    }
+    new_node->object_site.category = category;
+    new_node->object_site.price = price;
+    while ((q != NULL) && (q->object_site.price < new_node->object_site.price)) {
+        r = q;
+        q = q->next;
+    }
+    if (r == q) {
+        head_list = new_node;
+    }
+    else
+        r->next = new_node;
+    new_node->next = q;
+    return head_list;
+}
+
+void all_products_in_category(struct objs *list) {
+    struct objs *head;
+    for (head = list; head != NULL; head = head->next) {
+        printf("ID: %s\t Type: %u\t Price: %f\n",head->object_site.ID, head->object_site.category, head->object_site.price);
+    }
+}
+
+
 int create_fileManager(char pattern[]) { //Crea il file in lettura e scrittura;
     FILE *fp = fopen(pattern, "w+");
     if (fp == NULL) {
@@ -27,30 +68,27 @@ int create_fileManager(char pattern[]) { //Crea il file in lettura e scrittura;
     return 0;
 }
 
-FILE * open_fileManager(char pattern[]) { //Apre il file in lettura e scrittura;
-    FILE *fp = fopen(pattern, "a+");
+FILE * open_fileManager(char pattern[]) { //Apre il file in lettura;
+    FILE *fp = fopen(pattern, "r");
     if (fp == NULL) {
         printf("404"); //Non è possibile trovare il file nel pattern selezionato;
     }
     return fp;
 }
 
-void read_object(FILE *fp) {
-    struct object_site *object;
-    for (int i = 0; i > ETW; i++) {
-        fread(&object,sizeof(struct object_site),1,fp); //Legge un blocco di object_site size dal file fp e li coopia in memoria dall'indirizzo primo argomento ai successivi;
-        printf("%s\t%u\t%f\n",object->ID,object->category,object->price);
-    }
-}
-
-
 
 int main(int argc, const char * argv[]) {
 //    create_fileManager("/Users/Francesco_Utility/Desktop/Programmazione_I/ANSI-C/UNIME/eCommerce_exPreExamination/eCommerce_exPreExamination/fileManager.txt");
-    FILE *fp = open_fileManager("/Users/Francesco_Utility/Desktop/Programmazione_I/ANSI-C/UNIME/eCommerce_exPreExamination/eCommerce_exPreExamination/fileManager.txt");
-    read_object(fp);
+//    FILE *fp = open_fileManager("/Users/Francesco_Utility/Desktop/Programmazione_I/ANSI-C/UNIME/eCommerce_exPreExamination/eCommerce_exPreExamination/fileManager.txt");
     
     
+    struct objs *list_site = NULL;
+    list_site = add_to_site(list_site, "AA000AA", Watch, 89.90);
+    list_site = add_to_site(list_site, "AA001AA", Telephone, 999.99);
+    list_site = add_to_site(list_site, "AA001AA", Telephone, 19.99);
+    list_site = add_to_site(list_site, "AA001AA", Telephone, 1999.99);
+
+    all_products_in_category(list_site);
     return 0;
 }
 

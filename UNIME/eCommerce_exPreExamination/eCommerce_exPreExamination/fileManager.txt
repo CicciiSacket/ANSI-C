@@ -1,0 +1,1 @@
+struct object_site ojb1 = {"AA000AA",Watch,99.99};
