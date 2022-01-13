@@ -49,11 +49,20 @@ struct objs *add_to_site(struct objs *head_list, char id[SIZE_ID], enum category
     return head_list;
 }
 
-void all_products_in_category(struct objs *list) {
+void all_products_in_site(struct objs *list) {
     struct objs *head;
     for (head = list; head != NULL; head = head->next) {
         printf("ID: %s\t Type: %u\t Price: %f\n",head->object_site.ID, head->object_site.category, head->object_site.price);
     }
+}
+
+void all_products_in_category(struct objs *list, enum category category) {
+    struct objs *head;
+    for (head = list; head != NULL; head = head->next) {
+        if (head->object_site.category == category) {
+            printf("ID: %s\t Type: %u\t Price: %f\n",head->object_site.ID, head->object_site.category, head->object_site.price);
+        }
+    };
 }
 
 
@@ -81,11 +90,22 @@ int main(int argc, const char * argv[]) {
     
     struct objs *list_site = NULL;
     list_site = add_to_site(list_site, "AA000AA", Watch, 89.90);
-    list_site = add_to_site(list_site, "AA001AA", Telephone, 999.99);
-    list_site = add_to_site(list_site, "AA001AA", Telephone, 19.99);
-    list_site = add_to_site(list_site, "AA001AA", Telephone, 1999.99);
+    list_site = add_to_site(list_site, "AA001AA", Telephone, 79.99);
+    list_site = add_to_site(list_site, "AA002AA", Watch, 19.99);
+    list_site = add_to_site(list_site, "AA003AA", Armchairs, 1999.99);
+    list_site = add_to_site(list_site, "AA004AA", Telephone, 1.99);
+    list_site = add_to_site(list_site, "AA005AA", Watch, 9.99);
 
-    all_products_in_category(list_site);
+
+    all_products_in_site(list_site);
+    printf("\n\n");
+    all_products_in_category(list_site, Armchairs);
+    printf("\n\n");
+    all_products_in_category(list_site, Watch);
+    printf("\n\n");
+    all_products_in_category(list_site, Telephone);
+    
+    
     return 0;
 }
 
