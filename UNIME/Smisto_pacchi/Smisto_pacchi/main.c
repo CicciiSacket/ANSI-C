@@ -13,7 +13,7 @@
 typedef enum typePackage { defective , regular } typePackage; //Stabilisce se il pacco è da incenerire o meno;
 
 typedef struct Package { //Etichetta del singolo pacco;
-    char ID[7];
+    char ID[7]; //In una versione corretta deve essere char *ID; ATTENZIONE!!!
     char ID_Destination[5];
     float Weight;
     typePackage TypePackage;
