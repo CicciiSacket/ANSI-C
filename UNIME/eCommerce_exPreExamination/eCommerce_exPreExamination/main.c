@@ -65,6 +65,27 @@ void all_products_in_category(struct objs *list, enum category category) {
     };
 }
 
+//
+//struct objs *all_products_in_siteMAGG(struct objs *list) {
+//    struct objs *head;
+//    int k;
+//    do {
+//        objs *punt = head;
+//        k = 0;
+//        while (punt->next) {
+//            objs *punt1 = punt;
+//            punt = punt->next;
+//            if ((punt1->object_site.price) > (punt->object_site.price)) {
+//                int tmp = punt1->object_site.price;
+//                punt1->object_site.price = punt->object_site.price;
+//                punt->object_site.price = tmp;
+//                k = 1;
+//            }
+//        }
+//    } while (k != 0);
+//    return list;
+//}
+
 
 int create_fileManager(char pattern[]) { //Crea il file in lettura e scrittura;
     FILE *fp = fopen(pattern, "w+");
@@ -104,7 +125,9 @@ int main(int argc, const char * argv[]) {
     all_products_in_category(list_site, Watch);
     printf("\n\n");
     all_products_in_category(list_site, Telephone);
+    printf("\n\n");
     
+//    all_products_in_siteMAGG(list_site);
     
     return 0;
 }
