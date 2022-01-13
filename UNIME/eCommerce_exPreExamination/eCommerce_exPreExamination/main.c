@@ -25,7 +25,7 @@ typedef struct objs {
     struct objs *next;
 }objs;
 
-struct objs *add_to_site(struct objs *head_list, char id[SIZE_ID], enum category category, float price) { //Aggiunta di un elemento in maniera ordinata in base al prezzo
+struct objs *add_to_site(struct objs *head_list, char id[SIZE_ID], enum category category, float price) { //Aggiunta di un elemento in maniera ordinata in base al prezzo;
     struct objs *r = head_list, *q = head_list; //predecessore e successore del nuovo elemento;
     struct objs *new_node;
     new_node = malloc(sizeof(struct object_site));
@@ -39,7 +39,7 @@ struct objs *add_to_site(struct objs *head_list, char id[SIZE_ID], enum category
     }
     new_node->object_site.category = category;
     new_node->object_site.price = price;
-    while ((q != NULL) && (q->object_site.price < new_node->object_site.price)) {
+    while ((q != NULL) && (q->object_site.price < new_node->object_site.price)) { //Prezzo in ordine crescente;
         r = q;
         q = q->next;
     }
