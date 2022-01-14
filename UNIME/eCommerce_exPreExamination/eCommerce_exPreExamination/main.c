@@ -49,14 +49,14 @@ struct objs *add_to_site(struct objs *head_list, char id[SIZE_ID], enum category
     return head_list;
 }
 
-void all_products_in_site(struct objs *list) {
+void all_products_in_site(struct objs *list) { //Lista di tutti i prodotti
     struct objs *head;
     for (head = list; head != NULL; head = head->next) {
         printf("ID: %s\t Type: %u\t Price: %f\n",head->object_site.ID, head->object_site.category, head->object_site.price);
     }
 }
 
-void all_products_in_category(struct objs *list, enum category category) {
+void all_products_in_category(struct objs *list, enum category category) { //Lista prodotti in una categoria specifica
     struct objs *head;
     for (head = list; head != NULL; head = head->next) {
         if (head->object_site.category == category) {
@@ -65,26 +65,29 @@ void all_products_in_category(struct objs *list, enum category category) {
     };
 }
 
-//
-//struct objs *all_products_in_siteMAGG(struct objs *list) {
-//    struct objs *head;
-//    int k;
-//    do {
-//        objs *punt = head;
-//        k = 0;
-//        while (punt->next) {
-//            objs *punt1 = punt;
-//            punt = punt->next;
-//            if ((punt1->object_site.price) > (punt->object_site.price)) {
-//                int tmp = punt1->object_site.price;
-//                punt1->object_site.price = punt->object_site.price;
-//                punt->object_site.price = tmp;
-//                k = 1;
-//            }
-//        }
-//    } while (k != 0);
-//    return list;
-//}
+void search_product(struct objs *list, char * ID) { //Ricerca di un prodotto tramite id
+    for (; list != NULL; list = list->next) {
+        if (strcmp(list->object_site.ID,ID) == 0) {
+            printf("ID: %s\t Type: %u\t Price: %f\n",list->object_site.ID, list->object_site.category, list->object_site.price);
+        }
+    }
+}
+
+struct objs * all_products_reverse_price(struct objs *list) { //Ritorna la lista in ordine decrescente
+    objs* new_root = 0;
+    while (list) {
+        objs* next = list->next;
+        list->next = new_root;
+        new_root = list;
+        list = next;
+    }
+    return new_root;
+}
+
+void print_reverse(struct objs *list,category category) {
+    struct objs *list_site = all_products_reverse_price(list);
+    all_products_in_category(list_site, category);
+}
 
 
 int create_fileManager(char pattern[]) { //Crea il file in lettura e scrittura;
@@ -108,7 +111,6 @@ int main(int argc, const char * argv[]) {
 //    create_fileManager("/Users/Francesco_Utility/Desktop/Programmazione_I/ANSI-C/UNIME/eCommerce_exPreExamination/eCommerce_exPreExamination/fileManager.txt");
 //    FILE *fp = open_fileManager("/Users/Francesco_Utility/Desktop/Programmazione_I/ANSI-C/UNIME/eCommerce_exPreExamination/eCommerce_exPreExamination/fileManager.txt");
     
-    
     struct objs *list_site = NULL;
     list_site = add_to_site(list_site, "AA000AA", Watch, 89.90);
     list_site = add_to_site(list_site, "AA001AA", Telephone, 79.99);
@@ -116,18 +118,61 @@ int main(int argc, const char * argv[]) {
     list_site = add_to_site(list_site, "AA003AA", Armchairs, 1999.99);
     list_site = add_to_site(list_site, "AA004AA", Telephone, 1.99);
     list_site = add_to_site(list_site, "AA005AA", Watch, 9.99);
-
-
-    all_products_in_site(list_site);
-    printf("\n\n");
-    all_products_in_category(list_site, Armchairs);
-    printf("\n\n");
-    all_products_in_category(list_site, Watch);
-    printf("\n\n");
-    all_products_in_category(list_site, Telephone);
-    printf("\n\n");
     
-//    all_products_in_siteMAGG(list_site);
+//    int category;
+//    int order;
+//    printf("%s\n", "Welcome!");
+//    printf("%s\n%s\n\n","Select category please","Telephone - 1 \t Watch - 2 \t Armachairs - 3 \t EXIT - 9");
+//    scanf("%d",&category);
+//    printf("%s\n%s\n\n","Select order please", "0 - for decreasing price \t  1 - for rising price");
+//    scanf("%d",&order);
+//    switch (category) {
+//        case 1:
+////            if (order == 0) {
+////                list_site = all_products_reverse_price(list_site);
+////            }
+//            all_products_in_category(list_site, Telephone);
+//        case 2:
+//            if (order == 0) {
+//                list_site = all_products_reverse_price(list_site);
+//            }
+//            all_products_in_category(list_site, Watch);
+//        case 3:
+//            if (order == 0) {
+//                list_site = all_products_reverse_price(list_site);
+//            }
+//            all_products_in_category(list_site, Armchairs);
+//        case 9:
+//            exit(0);
+//    }
+//    char c;
+//    printf("%s\t%s\n", "Press C for all products in site", "EXIT - 9");
+//    scanf("%c",&c);
+//    if (c == 'c' || c == 'C') {
+//        all_products_in_site(list_site);
+//    }
+//    if (c == '9') {
+//        exit(0);
+//    }
+//
+    
+    
+
+
+//    all_products_in_site(list_site);
+//    printf("\n\n");
+//    all_products_in_category(list_site, Armchairs);
+//    printf("\n\n");
+//    all_products_in_category(list_site, Watch);
+//    printf("\n\n");
+//    all_products_in_category(list_site, Telephone);
+//    printf("\n\n");
+//    search_product(list_site, "AA003AA");
+//    printf("\n\n");
+//    list_site = all_products_reverse_price(list_site);
+//    printf("\n\n");
+//    all_products_in_site(list_site);
+//    printf("\n\n");
     
     return 0;
 }
