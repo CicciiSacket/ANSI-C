@@ -49,6 +49,21 @@ struct objs *add_to_site(struct objs *head_list, char id[SIZE_ID], enum category
     return head_list;
 }
 
+struct objs *delete_to_site (struct objs *list, char * ID) { //Si rimuove il prodotto che viene acquistato
+    struct objs *prev,*cur;
+        for (cur = list, prev = NULL; cur != NULL && strcmp(cur->object_site.ID ,ID) != 0 ; prev = cur, cur = cur->next);
+        if (cur == NULL) {
+            return list; // Non esiste un nodo con data;
+        }
+        if (prev == NULL) {
+            list = list->next; // Data si trova nel primo nodo;
+        }
+        else
+            prev->next = cur->next; // Data si trova in un qualunque altro nodo della lista;
+        free(cur);
+        return list;
+}
+
 void all_products_in_site(struct objs *list) { //Lista di tutti i prodotti
     struct objs *head;
     for (head = list; head != NULL; head = head->next) {
@@ -62,7 +77,7 @@ void all_products_in_category(struct objs *list, enum category category) { //Lis
         if (head->object_site.category == category) {
             printf("ID: %s\t Type: %u\t Price: %f\n",head->object_site.ID, head->object_site.category, head->object_site.price);
         }
-    };
+    }
 }
 
 void search_product(struct objs *list, char * ID) { //Ricerca di un prodotto tramite id
@@ -88,7 +103,17 @@ void print_reverse(struct objs *list,category category) {
     struct objs *list_site = all_products_reverse_price(list);
     all_products_in_category(list_site, category);
 }
-
+void pre_shop(struct objs *list) {
+    char c;
+    printf("%s\t%s\n", "Press C for all products", "EXIT - 9");
+    scanf("%c",&c);
+    if (c == 'c' || c == 'C') {
+        all_products_in_site(list);
+    }
+    if (c == '9') {
+        exit(0);
+    }
+}
 
 int create_fileManager(char pattern[]) { //Crea il file in lettura e scrittura;
     FILE *fp = fopen(pattern, "w+");
@@ -106,7 +131,6 @@ FILE * open_fileManager(char pattern[]) { //Apre il file in lettura;
     return fp;
 }
 
-
 int main(int argc, const char * argv[]) {
 //    create_fileManager("/Users/Francesco_Utility/Desktop/Programmazione_I/ANSI-C/UNIME/eCommerce_exPreExamination/eCommerce_exPreExamination/fileManager.txt");
 //    FILE *fp = open_fileManager("/Users/Francesco_Utility/Desktop/Programmazione_I/ANSI-C/UNIME/eCommerce_exPreExamination/eCommerce_exPreExamination/fileManager.txt");
@@ -119,61 +143,28 @@ int main(int argc, const char * argv[]) {
     list_site = add_to_site(list_site, "AA004AA", Telephone, 1.99);
     list_site = add_to_site(list_site, "AA005AA", Watch, 9.99);
     
-//    int category;
-//    int order;
-//    printf("%s\n", "Welcome!");
-//    printf("%s\n%s\n\n","Select category please","Telephone - 1 \t Watch - 2 \t Armachairs - 3 \t EXIT - 9");
-//    scanf("%d",&category);
-//    printf("%s\n%s\n\n","Select order please", "0 - for decreasing price \t  1 - for rising price");
-//    scanf("%d",&order);
-//    switch (category) {
-//        case 1:
-////            if (order == 0) {
-////                list_site = all_products_reverse_price(list_site);
-////            }
-//            all_products_in_category(list_site, Telephone);
-//        case 2:
-//            if (order == 0) {
-//                list_site = all_products_reverse_price(list_site);
-//            }
-//            all_products_in_category(list_site, Watch);
-//        case 3:
-//            if (order == 0) {
-//                list_site = all_products_reverse_price(list_site);
-//            }
-//            all_products_in_category(list_site, Armchairs);
-//        case 9:
-//            exit(0);
-//    }
-//    char c;
-//    printf("%s\t%s\n", "Press C for all products in site", "EXIT - 9");
-//    scanf("%c",&c);
-//    if (c == 'c' || c == 'C') {
-//        all_products_in_site(list_site);
-//    }
-//    if (c == '9') {
-//        exit(0);
-//    }
-//
     
-    
-
-
-//    all_products_in_site(list_site);
-//    printf("\n\n");
-//    all_products_in_category(list_site, Armchairs);
-//    printf("\n\n");
-//    all_products_in_category(list_site, Watch);
-//    printf("\n\n");
-//    all_products_in_category(list_site, Telephone);
-//    printf("\n\n");
-//    search_product(list_site, "AA003AA");
-//    printf("\n\n");
-//    list_site = all_products_reverse_price(list_site);
-//    printf("\n\n");
-//    all_products_in_site(list_site);
-//    printf("\n\n");
-    
+    all_products_in_site(list_site);
+    printf("\n\n");
+    all_products_in_category(list_site, Armchairs);
+    printf("\n\n");
+    all_products_in_category(list_site, Watch);
+    printf("\n\n");
+    all_products_in_category(list_site, Telephone);
+    printf("\n\n");
+    search_product(list_site, "AA003AA");
+    printf("\n\n");
+    list_site = all_products_reverse_price(list_site);
+    printf("\n\n");
+    all_products_in_site(list_site);
+    printf("\n\n");
+    list_site = delete_to_site(list_site,"AA004AA");
+    printf("\n\n");
+    all_products_in_site(list_site);
+    printf("\n\n");
+    list_site = all_products_reverse_price(list_site);
+    printf("\n\n");
+    all_products_in_site(list_site);
     return 0;
 }
 
