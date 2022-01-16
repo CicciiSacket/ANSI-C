@@ -25,7 +25,7 @@ typedef struct objs {
     struct objs *next;
 }objs;
 
-struct objs *add_to_site(struct objs *head_list, char id[SIZE_ID], enum category category, float price) { //Aggiunta di un elemento in maniera ordinata in base al prezzo;
+struct objs *add_to_site(struct objs *head_list, char * id, enum category category, float price) { //Aggiunta di un elemento in maniera ordinata in base al prezzo;
     struct objs *r = head_list, *q = head_list; //predecessore e successore del nuovo elemento;
     struct objs *new_node;
     new_node = malloc(sizeof(struct object_site));
@@ -189,10 +189,10 @@ int main(int argc, const char * argv[]) { //Main per le gestione sito senza affi
 //    printf("\n\n");
 //    printf("\n\n");
     
-    struct objs * list_file = NULL;
-    list_file = reading_and_compile(pattern, list_file);
-    all_products_in_site(list_file);
-    printf("\n\n");
+//    struct objs * list_file = NULL;
+//    list_file = reading_and_compile(pattern, list_file);
+//    all_products_in_site(list_file);
+//    printf("\n\n");
     return 0;
 }
 
