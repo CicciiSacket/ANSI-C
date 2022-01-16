@@ -131,24 +131,31 @@ FILE * open_fileManager(char pattern[]) { //Apre il file in lettura;
     return fp;
 }
 
-void reading_from_file_add_to_list(struct objs *list_file, FILE *fp){
-    int c;
-    int k= 0;
-    object_site *v[5];
-    while ((c=fgetc(fp))!= EOF);
-    while(fscanf(fp,"%s%u%f\n", v[k]->ID,&(v[k]->category), &(v[k]->price)) != EOF)
-        k++;
-    printf("%s\t%u\t%f\n", v[k]->ID,(v[k]->category),(v[k]->price));
-//    for (int i=0; i<k; i++) {
-//        printf("%s%u%f\n",v[i].ID, v[i].category, v[i].price);
-//        list_file = add_to_site(list_file, v[i].ID, v[i].category, v[i].price);
-//    }
-    fclose(fp);
+struct objs * reading_and_compile(char pattern[],struct objs *list_file) { //Lettura dei prodotti dal file e aggiunta in una nuova lista;
+    FILE *fp = open_fileManager(pattern);
+    char * id;
+    char * category;
+    float price;
+    while(fscanf(fp, "%s %s %f",id,category,&price)!= EOF) {
+        if (strcmp(category, "Watch,") == 0) {
+            list_file = add_to_site(list_file, id, Watch,price);
+        }
+        if (strcmp(category, "Telephone,") == 0) {
+            list_file = add_to_site(list_file, id, Telephone,price);
+        }
+        if (strcmp(category, "Armchairs,") == 0 ) {
+            list_file = add_to_site(list_file, id, Armchairs,price);
+        }
+    }
+        return list_file;
 }
 
-int main(int argc, const char * argv[]) {
-//    create_fileManager("/Users/Francesco_Utility/Desktop/Programmazione_I/ANSI-C/UNIME/eCommerce_exPreExamination/eCommerce_exPreExamination/fileManager.txt");
-    FILE *fp = open_fileManager("/Users/Francesco_Utility/Desktop/Programmazione_I/ANSI-C/UNIME/eCommerce_exPreExamination/eCommerce_exPreExamination/fileManager.txt");
+
+
+
+int main(int argc, const char * argv[]) { //Main per le gestione sito senza affidarsi al file;
+    char pattern [] = "/Users/Francesco_Utility/Desktop/Programmazione_I/ANSI-C/UNIME/eCommerce_exPreExamination/eCommerce_exPreExamination/fileManager.txt";
+    //    create_fileManager("/Users/Francesco_Utility/Desktop/Programmazione_I/ANSI-C/UNIME/eCommerce_exPreExamination/eCommerce_exPreExamination/fileManager.txt");
     
     struct objs *list_site = NULL;
     list_site = add_to_site(list_site, "AA000AA", Watch, 89.90);
@@ -157,8 +164,7 @@ int main(int argc, const char * argv[]) {
     list_site = add_to_site(list_site, "AA003AA", Armchairs, 1999.99);
     list_site = add_to_site(list_site, "AA004AA", Telephone, 1.99);
     list_site = add_to_site(list_site, "AA005AA", Watch, 9.99);
-    
-    
+//
 //    all_products_in_site(list_site);
 //    printf("\n\n");
 //    all_products_in_category(list_site, Armchairs);
@@ -180,13 +186,13 @@ int main(int argc, const char * argv[]) {
 //    list_site = all_products_reverse_price(list_site);
 //    printf("\n\n");
 //    all_products_in_site(list_site);
-//
-    printf("\nLISTA DA FILE\n");
-    struct objs *list_file = NULL;
-    reading_from_file_add_to_list(list_file,fp);
-    printf("\n\n");
-    all_products_in_site(list_file);
+//    printf("\n\n");
+//    printf("\n\n");
     
+    struct objs * list_file = NULL;
+    list_file = reading_and_compile(pattern, list_file);
+    all_products_in_site(list_file);
+    printf("\n\n");
     return 0;
 }
 
