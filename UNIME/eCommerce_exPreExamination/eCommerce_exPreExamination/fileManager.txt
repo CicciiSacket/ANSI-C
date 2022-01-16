@@ -1,6 +1,6 @@
-AA000AA, Watch, 89.90
-AA001AA, Telephone, 79.99
-AA002AA, Watch, 19.99
-AA003AA, Armchairs, 1999.99
-AA004AA, Telephone, 1.99
-AA005AA, Watch, 9.99
+AA000AA Watch 89.90
+AA001AA Telephone 79.99
+AA002AA Watch 19.99
+AA003AA Armchairs 1999.99
+AA004AA Telephone 1.99
+AA005AA Watch 9.99

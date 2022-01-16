@@ -137,13 +137,13 @@ struct objs * reading_and_compile(char pattern[],struct objs *list_file) { //Let
     char * category;
     float price;
     while(fscanf(fp, "%s %s %f",id,category,&price)!= EOF) {
-        if (strcmp(category, "Watch,") == 0) {
+        if (strcmp(category, "Watch") == 0) {
             list_file = add_to_site(list_file, id, Watch,price);
         }
-        if (strcmp(category, "Telephone,") == 0) {
+        if (strcmp(category, "Telephone") == 0) {
             list_file = add_to_site(list_file, id, Telephone,price);
         }
-        if (strcmp(category, "Armchairs,") == 0 ) {
+        if (strcmp(category, "Armchairs") == 0 ) {
             list_file = add_to_site(list_file, id, Armchairs,price);
         }
     }
@@ -189,10 +189,10 @@ int main(int argc, const char * argv[]) { //Main per le gestione sito senza affi
 //    printf("\n\n");
 //    printf("\n\n");
     
-//    struct objs * list_file = NULL;
-//    list_file = reading_and_compile(pattern, list_file);
-//    all_products_in_site(list_file);
-//    printf("\n\n");
+    struct objs * list_file = NULL;
+    list_file = reading_and_compile(pattern, list_file);
+    all_products_in_site(list_file);
+    printf("\n\n");
     return 0;
 }
 
