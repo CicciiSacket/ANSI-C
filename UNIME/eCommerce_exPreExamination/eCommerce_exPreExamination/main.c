@@ -138,16 +138,35 @@ struct objs * reading_and_compile(char pattern[],struct objs *list_file) { //Let
     float price;
     while(fscanf(fp, "%s %s %f",id,category,&price)!= EOF) {
         if (strcmp(category, "Watch") == 0) {
-            list_file = add_to_site(list_file, id, Watch,price);
+            struct objs *r = list_file, *q = list_file; //predecessore e successore del nuovo elemento;
+            struct objs *new_node;
+            new_node = malloc(sizeof(struct object_site));
+            if (new_node == NULL) {
+                printf("%s","Error");
+                exit(EXIT_FAILURE);
+            }
+            new_node->object_site.ID = id;
+            new_node->object_site.category = Watch;
+            new_node->object_site.price = price;
+            while ((q != NULL) && (q->object_site.price < new_node->object_site.price)) { //Prezzo in ordine crescente;
+                r = q;
+                q = q->next;
+            }
+            if (r == q) {
+                list_file = new_node;
+            }
+            else
+                r->next = new_node;
+            new_node->next = q;
+            return list_file;
         }
-        if (strcmp(category, "Telephone") == 0) {
-            list_file = add_to_site(list_file, id, Telephone,price);
-        }
-        if (strcmp(category, "Armchairs") == 0 ) {
-            list_file = add_to_site(list_file, id, Armchairs,price);
-        }
+//        if (strcmp(category, "Telephone") == 0) {
+//            list_file = add_to_site(list_file, id, Telephone,price);
+//        }
+//        if (strcmp(category, "Armchairs") == 0 ) {
+//            list_file = add_to_site(list_file, id, Armchairs,price);
+//        }
     }
-        return list_file;
 }
 
 
@@ -191,6 +210,7 @@ int main(int argc, const char * argv[]) { //Main per le gestione sito senza affi
     
     struct objs * list_file = NULL;
     list_file = reading_and_compile(pattern, list_file);
+//    printf(list_file->object_site.ID);
     all_products_in_site(list_file);
     printf("\n\n");
     return 0;
